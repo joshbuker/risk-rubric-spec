@@ -1,0 +1,155 @@
+<h2>Section 3: Scanner Submission API</h2>
+<p class="subtitle">The interface scanner partners use to submit scores. Does this payload structure and flow look right?</p>
+
+<div style="font-family: monospace; font-size: 12px; line-height: 1.7; padding: 24px; background: #0d1117; border-radius: 12px; color: #c9d1d9;">
+
+  <!-- Auth -->
+  <div style="margin-bottom: 20px; padding: 12px; background: #161b22; border-left: 3px solid #f0883e; border-radius: 4px;">
+    <span style="color: #f0883e; font-weight: bold;">Auth:</span>
+    <span style="color: #8b949e; margin-left: 8px;">All scanner endpoints require </span>
+    <code style="color: #a5d6ff;">Authorization: Bearer &lt;api_key&gt;</code>
+    <span style="color: #8b949e;"> header. Keys issued by CSA admin on scanner admission. Hashed with argon2 at rest.</span>
+  </div>
+
+  <!-- Endpoints -->
+  <div style="color: #8b949e; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">Endpoints</div>
+  <div style="display: grid; grid-template-columns: auto 1fr 2fr; gap: 4px 16px; margin-bottom: 20px; align-items: start;">
+    <span style="color: #56d364; font-weight: bold;">POST</span>
+    <span style="color: #c9d1d9;">/api/v1/scanner/scores</span>
+    <span style="color: #8b949e;">Submit or update a score. Upserts on (service, scanner). Triggers aggregation recompute.</span>
+
+    <span style="color: #79c0ff; font-weight: bold;">GET</span>
+    <span style="color: #c9d1d9;">/api/v1/scanner/scores</span>
+    <span style="color: #8b949e;">List all scores submitted by this scanner. Supports pagination.</span>
+
+    <span style="color: #79c0ff; font-weight: bold;">GET</span>
+    <span style="color: #c9d1d9;">/api/v1/scanner/scores/{score_id}</span>
+    <span style="color: #8b949e;">Get a specific submission including match result and any CSA review flags.</span>
+
+    <span style="color: #79c0ff; font-weight: bold;">GET</span>
+    <span style="color: #c9d1d9;">/api/v1/scanner/services</span>
+    <span style="color: #8b949e;">List services this scanner has scored — useful for reconciliation and version tracking.</span>
+  </div>
+
+  <!-- Payload examples -->
+  <div style="color: #8b949e; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">POST /api/v1/scanner/scores — Request Payload</div>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+
+    <div>
+      <div style="color: #79c0ff; font-size: 11px; margin-bottom: 6px;">Example: AI Model submission</div>
+      <pre style="background: #161b22; border-radius: 8px; padding: 14px; font-size: 11px; overflow-x: auto; margin: 0; border: 1px solid #30363d;"><span style="color: #8b949e;">{</span>
+  <span style="color: #79c0ff;">"service"</span><span style="color: #8b949e;">: {</span>
+    <span style="color: #79c0ff;">"type"</span><span style="color: #8b949e;">:</span> <span style="color: #a5d6ff;">"model"</span><span style="color: #8b949e;">,</span>
+    <span style="color: #6e7681;">// Identity — used for matching</span>
+    <span style="color: #79c0ff;">"engine_provider"</span><span style="color: #8b949e;">:</span> <span style="color: #a5d6ff;">"Anthropic"</span><span style="color: #8b949e;">,</span>
+    <span style="color: #79c0ff;">"model_name"</span><span style="color: #8b949e;">:</span> <span style="color: #a5d6ff;">"Claude"</span><span style="color: #8b949e;">,</span>
+    <span style="color: #79c0ff;">"model_version"</span><span style="color: #8b949e;">:</span> <span style="color: #a5d6ff;">"opus-4.6"</span><span style="color: #8b949e;">,</span>
+    <span style="color: #79c0ff;">"platform_provider"</span><span style="color: #8b949e;">:</span> <span style="color: #f85149;">null</span><span style="color: #8b949e;">,</span>
+    <span style="color: #6e7681;">// External IDs (optional, improve matching)</span>
+    <span style="color: #79c0ff;">"identifiers"</span><span style="color: #8b949e;">: [</span>
+      <span style="color: #8b949e;">{ </span><span style="color: #79c0ff;">"type"</span><span style="color: #8b949e;">:</span> <span style="color: #a5d6ff;">"openrouter_id"</span><span style="color: #8b949e;">,</span>
+        <span style="color: #79c0ff;">"value"</span><span style="color: #8b949e;">:</span> <span style="color: #a5d6ff;">"anthropic/claude-opus-4"</span> <span style="color: #8b949e;">}</span>
+    <span style="color: #8b949e;">],</span>
+    <span style="color: #6e7681;">// Metadata (create/update listing)</span>
+    <span style="color: #79c0ff;">"metadata"</span><span style="color: #8b949e;">: {</span>
+      <span style="color: #79c0ff;">"description"</span><span style="color: #8b949e;">:</span> <span style="color: #a5d6ff;">"..."</span><span style="color: #8b949e;">,</span>
+      <span style="color: #79c0ff;">"model_card_url"</span><span style="color: #8b949e;">:</span> <span style="color: #a5d6ff;">"https://..."</span><span style="color: #8b949e;">,</span>
+      <span style="color: #79c0ff;">"modalities"</span><span style="color: #8b949e;">: [</span><span style="color: #a5d6ff;">"text"</span><span style="color: #8b949e;">,</span> <span style="color: #a5d6ff;">"image"</span><span style="color: #8b949e;">],</span>
+      <span style="color: #79c0ff;">"is_open_source"</span><span style="color: #8b949e;">:</span> <span style="color: #f85149;">false</span>
+    <span style="color: #8b949e;">}</span>
+  <span style="color: #8b949e;">},</span>
+  <span style="color: #79c0ff;">"score"</span><span style="color: #8b949e;">: {</span>
+    <span style="color: #79c0ff;">"methodology_version"</span><span style="color: #8b949e;">:</span> <span style="color: #a5d6ff;">"v2.0"</span><span style="color: #8b949e;">,</span>
+    <span style="color: #79c0ff;">"composite_score"</span><span style="color: #8b949e;">:</span> <span style="color: #ffa657;">852.0</span><span style="color: #8b949e;">,</span>
+    <span style="color: #79c0ff;">"letter_grade"</span><span style="color: #8b949e;">:</span> <span style="color: #a5d6ff;">"B"</span><span style="color: #8b949e;">,</span>
+    <span style="color: #79c0ff;">"evidence_url"</span><span style="color: #8b949e;">:</span> <span style="color: #a5d6ff;">"https://scanner.example/evidence/abc"</span><span style="color: #8b949e;">,</span>
+    <span style="color: #79c0ff;">"pillar_scores"</span><span style="color: #8b949e;">: {</span>
+      <span style="color: #79c0ff;">"transparency"</span><span style="color: #8b949e;">:</span>     <span style="color: #ffa657;">880</span><span style="color: #8b949e;">,</span>
+      <span style="color: #79c0ff;">"reliability"</span><span style="color: #8b949e;">:</span>      <span style="color: #ffa657;">820</span><span style="color: #8b949e;">,</span>
+      <span style="color: #79c0ff;">"security"</span><span style="color: #8b949e;">:</span>         <span style="color: #ffa657;">900</span><span style="color: #8b949e;">,</span>
+      <span style="color: #79c0ff;">"privacy"</span><span style="color: #8b949e;">:</span>          <span style="color: #ffa657;">840</span><span style="color: #8b949e;">,</span>
+      <span style="color: #79c0ff;">"safety_societal"</span><span style="color: #8b949e;">:</span>  <span style="color: #ffa657;">810</span><span style="color: #8b949e;">,</span>
+      <span style="color: #79c0ff;">"excessive_agency"</span><span style="color: #8b949e;">:</span> <span style="color: #ffa657;">850</span>
+    <span style="color: #8b949e;">}</span>
+  <span style="color: #8b949e;">}</span>
+<span style="color: #8b949e;">}</span></pre>
+    </div>
+
+    <div>
+      <div style="color: #a5d6ff; font-size: 11px; margin-bottom: 6px;">Example: MCP Server submission</div>
+      <pre style="background: #161b22; border-radius: 8px; padding: 14px; font-size: 11px; overflow-x: auto; margin: 0; border: 1px solid #30363d;"><span style="color: #8b949e;">{</span>
+  <span style="color: #79c0ff;">"service"</span><span style="color: #8b949e;">: {</span>
+    <span style="color: #79c0ff;">"type"</span><span style="color: #8b949e;">:</span> <span style="color: #a5d6ff;">"mcp_server"</span><span style="color: #8b949e;">,</span>
+    <span style="color: #6e7681;">// Identity — used for matching</span>
+    <span style="color: #79c0ff;">"target_service"</span><span style="color: #8b949e;">:</span> <span style="color: #a5d6ff;">"gmail"</span><span style="color: #8b949e;">,</span>
+    <span style="color: #79c0ff;">"provider_org"</span><span style="color: #8b949e;">:</span> <span style="color: #a5d6ff;">"Google"</span><span style="color: #8b949e;">,</span>
+    <span style="color: #79c0ff;">"provider_tier"</span><span style="color: #8b949e;">:</span> <span style="color: #a5d6ff;">"official"</span><span style="color: #8b949e;">,</span>
+    <span style="color: #79c0ff;">"hosting_type"</span><span style="color: #8b949e;">:</span> <span style="color: #a5d6ff;">"hosted"</span><span style="color: #8b949e;">,</span>
+    <span style="color: #6e7681;">// External IDs (optional, improve matching)</span>
+    <span style="color: #79c0ff;">"identifiers"</span><span style="color: #8b949e;">: [</span>
+      <span style="color: #8b949e;">{ </span><span style="color: #79c0ff;">"type"</span><span style="color: #8b949e;">:</span> <span style="color: #a5d6ff;">"hosted_url"</span><span style="color: #8b949e;">,</span>
+        <span style="color: #79c0ff;">"value"</span><span style="color: #8b949e;">:</span> <span style="color: #a5d6ff;">"https://mcp.googleapis.com/gmail"</span> <span style="color: #8b949e;">}</span>
+    <span style="color: #8b949e;">],</span>
+    <span style="color: #6e7681;">// Metadata (create/update listing)</span>
+    <span style="color: #79c0ff;">"metadata"</span><span style="color: #8b949e;">: {</span>
+      <span style="color: #79c0ff;">"name"</span><span style="color: #8b949e;">:</span> <span style="color: #a5d6ff;">"Gmail MCP"</span><span style="color: #8b949e;">,</span>
+      <span style="color: #79c0ff;">"description"</span><span style="color: #8b949e;">:</span> <span style="color: #a5d6ff;">"..."</span><span style="color: #8b949e;">,</span>
+      <span style="color: #79c0ff;">"transport_types"</span><span style="color: #8b949e;">: [</span><span style="color: #a5d6ff;">"http"</span><span style="color: #8b949e;">],</span>
+      <span style="color: #79c0ff;">"tool_count"</span><span style="color: #8b949e;">:</span> <span style="color: #ffa657;">12</span>
+    <span style="color: #8b949e;">}</span>
+  <span style="color: #8b949e;">},</span>
+  <span style="color: #79c0ff;">"score"</span><span style="color: #8b949e;">: {</span>
+    <span style="color: #79c0ff;">"methodology_version"</span><span style="color: #8b949e;">:</span> <span style="color: #a5d6ff;">"v2.0"</span><span style="color: #8b949e;">,</span>
+    <span style="color: #79c0ff;">"scanned_version"</span><span style="color: #8b949e;">:</span> <span style="color: #a5d6ff;">"2.1.0"</span><span style="color: #8b949e;">,</span>
+    <span style="color: #79c0ff;">"composite_score"</span><span style="color: #8b949e;">:</span> <span style="color: #ffa657;">761.6</span><span style="color: #8b949e;">,</span>
+    <span style="color: #79c0ff;">"letter_grade"</span><span style="color: #8b949e;">:</span> <span style="color: #a5d6ff;">"C"</span><span style="color: #8b949e;">,</span>
+    <span style="color: #79c0ff;">"evidence_url"</span><span style="color: #8b949e;">:</span> <span style="color: #a5d6ff;">"https://scanner.example/evidence/xyz"</span><span style="color: #8b949e;">,</span>
+    <span style="color: #79c0ff;">"pillar_scores"</span><span style="color: #8b949e;">: {</span>
+      <span style="color: #79c0ff;">"transparency"</span><span style="color: #8b949e;">:</span>     <span style="color: #ffa657;">780</span><span style="color: #8b949e;">,</span>
+      <span style="color: #79c0ff;">"reliability"</span><span style="color: #8b949e;">:</span>      <span style="color: #ffa657;">750</span><span style="color: #8b949e;">,</span>
+      <span style="color: #79c0ff;">"security"</span><span style="color: #8b949e;">:</span>         <span style="color: #ffa657;">800</span><span style="color: #8b949e;">,</span>
+      <span style="color: #79c0ff;">"privacy"</span><span style="color: #8b949e;">:</span>          <span style="color: #ffa657;">720</span><span style="color: #8b949e;">,</span>
+      <span style="color: #79c0ff;">"safety_societal"</span><span style="color: #8b949e;">:</span>  <span style="color: #ffa657;">760</span><span style="color: #8b949e;">,</span>
+      <span style="color: #79c0ff;">"excessive_agency"</span><span style="color: #8b949e;">:</span> <span style="color: #ffa657;">740</span>
+    <span style="color: #8b949e;">}</span>
+  <span style="color: #8b949e;">}</span>
+<span style="color: #8b949e;">}</span></pre>
+    </div>
+  </div>
+
+  <!-- Response + validation -->
+  <div style="color: #8b949e; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">Response + Validation</div>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+    <div>
+      <div style="color: #56d364; font-size: 11px; margin-bottom: 6px;">201 Created / 200 Updated</div>
+      <pre style="background: #161b22; border-radius: 8px; padding: 12px; font-size: 11px; margin: 0; border: 1px solid #30363d;"><span style="color: #8b949e;">{</span>
+  <span style="color: #79c0ff;">"status"</span><span style="color: #8b949e;">:</span> <span style="color: #a5d6ff;">"created"</span> <span style="color: #6e7681;">| "updated"</span><span style="color: #8b949e;">,</span>
+  <span style="color: #79c0ff;">"service_id"</span><span style="color: #8b949e;">:</span> <span style="color: #a5d6ff;">"uuid"</span><span style="color: #8b949e;">,</span>
+  <span style="color: #79c0ff;">"service_slug"</span><span style="color: #8b949e;">:</span> <span style="color: #a5d6ff;">"model/anthropic/claude/opus-4.6"</span><span style="color: #8b949e;">,</span>
+  <span style="color: #79c0ff;">"match_confidence"</span><span style="color: #8b949e;">:</span> <span style="color: #a5d6ff;">"high"</span> <span style="color: #6e7681;">| "medium" | "auto_created"</span><span style="color: #8b949e;">,</span>
+  <span style="color: #79c0ff;">"score_id"</span><span style="color: #8b949e;">:</span> <span style="color: #a5d6ff;">"uuid"</span><span style="color: #8b949e;">,</span>
+  <span style="color: #79c0ff;">"review_flagged"</span><span style="color: #8b949e;">:</span> <span style="color: #f85149;">false</span><span style="color: #8b949e;">,</span>
+  <span style="color: #79c0ff;">"published"</span><span style="color: #8b949e;">:</span> <span style="color: #f85149;">true</span>
+<span style="color: #8b949e;">}</span></pre>
+    </div>
+    <div style="background: #161b22; border-radius: 6px; padding: 12px; font-size: 11px; color: #8b949e;">
+      <div style="color: #c9d1d9; margin-bottom: 8px;">Validation rules (422 on failure):</div>
+      <div>✓ All 6 pillar scores present, each in [0, 1000]</div>
+      <div>✓ composite_score within 5% of weighted pillar sum</div>
+      <div>✓ letter_grade matches composite_score band</div>
+      <div>✓ methodology_version is a known accepted value</div>
+      <div>✓ service.type matches scanner's admitted service_types[]</div>
+      <div>✓ hosting_type = "hosted" enforced for mcp_server in v1</div>
+    </div>
+  </div>
+
+  <!-- Matching flow -->
+  <div style="background: #161b22; border-radius: 8px; padding: 14px; font-size: 11px; color: #8b949e; display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; align-items: start;">
+    <span style="color: #56d364; font-weight: bold;">1.</span><span>Check <code style="color: #c9d1d9;">service_identifiers</code> for any submitted external ID → <span style="color: #56d364;">high confidence</span>, auto-link</span>
+    <span style="color: #56d364; font-weight: bold;">2.</span><span>Else: match on identity tuple → <span style="color: #ffa657;">medium confidence</span>, auto-link + flag for CSA review</span>
+    <span style="color: #56d364; font-weight: bold;">3.</span><span>Else: auto-create new service listing → <span style="color: #f85149;">auto_created</span>, flag for CSA review</span>
+    <span style="color: #56d364; font-weight: bold;">4.</span><span><strong style="color: #c9d1d9;">Score always published immediately.</strong> CSA review never blocks publication.</span>
+    <span style="color: #56d364; font-weight: bold;">5.</span><span>Recompute <code style="color: #c9d1d9;">aggregated_scores</code> for the affected service.</span>
+  </div>
+
+</div>

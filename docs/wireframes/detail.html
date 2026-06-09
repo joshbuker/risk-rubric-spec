@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Service Detail — Risk Rubric v2 Wireframe</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 14px; background: #f0f2f5; color: #1a1a2e; min-height: 100vh; }
+
+  /* ── Top nav ── */
+  .topnav { background: #1a1a2e; color: #fff; padding: 10px 24px; display: flex; align-items: center; gap: 16px; }
+  .topnav .logo { font-weight: 700; font-size: 16px; color: #60a5fa; letter-spacing: -0.3px; }
+  .topnav .sep { color: #4b5563; }
+  .topnav .breadcrumb { color: #9ca3af; font-size: 13px; }
+  .topnav .breadcrumb a { color: #93c5fd; text-decoration: none; }
+  .topnav .breadcrumb a:hover { text-decoration: underline; }
+
+  /* ── Page layout ── */
+  .page { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+
+  /* ── Hero header ── */
+  .hero { background: #fff; border-radius: 12px; padding: 28px 32px; display: flex; gap: 32px; align-items: flex-start; margin-bottom: 20px; border: 1px solid #e5e7eb; }
+  .hero-left { flex: 1; min-width: 0; }
+  .service-type-chip { display: inline-flex; align-items: center; gap: 5px; background: #eff6ff; color: #1d4ed8; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 99px; margin-bottom: 10px; border: 1px solid #bfdbfe; }
+  .service-name { font-size: 26px; font-weight: 700; color: #111827; line-height: 1.2; margin-bottom: 6px; }
+  .service-subtitle { color: #6b7280; font-size: 14px; margin-bottom: 16px; }
+  .meta-grid { display: flex; flex-wrap: wrap; gap: 20px; }
+  .meta-item { display: flex; flex-direction: column; gap: 2px; }
+  .meta-label { font-size: 11px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; }
+  .meta-value { font-size: 13px; color: #374151; font-weight: 500; }
+  .meta-link { color: #2563eb; text-decoration: none; }
+  .meta-link:hover { text-decoration: underline; }
+
+  .hero-right { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .composite-block { display: flex; flex-direction: column; align-items: center; background: #f8fafc; border-radius: 12px; border: 2px solid #e2e8f0; padding: 20px 28px; }
+  .composite-label { font-size: 11px; font-weight: 600; text-transform: uppercase; color: #9ca3af; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .composite-grade { font-size: 56px; font-weight: 800; line-height: 1; color: #16a34a; }
+  .composite-score { font-size: 22px; font-weight: 600; color: #374151; margin-top: 4px; }
+  .composite-desc { font-size: 11px; color: #6b7280; margin-top: 4px; }
+  .confidence-block { display: flex; align-items: center; gap: 6px; background: #f8fafc; border-radius: 8px; border: 1px solid #e5e7eb; padding: 8px 14px; }
+  .conf-icon { font-size: 16px; }
+  .conf-text { font-size: 12px; color: #6b7280; }
+  .conf-count { font-weight: 700; color: #374151; }
+
+  .stale-banner { display: flex; align-items: center; gap: 10px; background: #fffbeb; border: 1px solid #fbbf24; border-radius: 8px; padding: 10px 16px; margin-bottom: 20px; color: #92400e; font-size: 13px; }
+  .stale-banner .icon { font-size: 18px; }
+
+  /* ── Pillar breakdown ── */
+  .section-title { font-size: 13px; font-weight: 700; text-transform: uppercase; color: #6b7280; letter-spacing: 0.5px; margin-bottom: 12px; }
+  .pillars-card { background: #fff; border-radius: 12px; padding: 24px 28px; margin-bottom: 20px; border: 1px solid #e5e7eb; }
+  .pillar-row { display: grid; grid-template-columns: 180px 36px 1fr 56px; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid #f3f4f6; }
+  .pillar-row:last-child { border-bottom: none; }
+  .pillar-name { font-size: 13px; color: #374151; font-weight: 500; }
+  .pillar-grade { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 24px; border-radius: 4px; font-size: 12px; font-weight: 700; }
+  .ga { background: #dcfce7; color: #166534; }
+  .gb { background: #d1fae5; color: #065f46; }
+  .gc { background: #fef9c3; color: #854d0e; }
+  .gd { background: #ffedd5; color: #9a3412; }
+  .gf { background: #fee2e2; color: #991b1b; }
+  .pillar-bar-wrap { height: 12px; background: #f1f5f9; border-radius: 99px; overflow: hidden; position: relative; }
+  .pillar-bar { height: 100%; border-radius: 99px; }
+  .bar-a { background: #22c55e; }
+  .bar-b { background: #4ade80; }
+  .bar-c { background: #facc15; }
+  .bar-d { background: #fb923c; }
+  .bar-f { background: #ef4444; }
+  .pillar-score { font-size: 13px; font-weight: 600; color: #374151; text-align: right; }
+  .pillar-score small { font-weight: 400; color: #9ca3af; font-size: 11px; }
+  .warn-pillar .pillar-name { color: #dc2626; }
+  .weight-tag { display: inline; font-size: 10px; color: #9ca3af; margin-left: 4px; }
+
+  /* ── Scanner breakdown ── */
+  .scanners-card { background: #fff; border-radius: 12px; padding: 24px 28px; margin-bottom: 20px; border: 1px solid #e5e7eb; }
+  .scanner-block { border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 12px; overflow: hidden; }
+  .scanner-block:last-child { margin-bottom: 0; }
+  .scanner-header { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: #f8fafc; cursor: pointer; }
+  .scanner-header:hover { background: #f1f5f9; }
+  .scanner-name { font-weight: 600; font-size: 13px; color: #1e40af; flex: 1; }
+  .scanner-date { font-size: 11px; color: #9ca3af; }
+  .scanner-composite { font-size: 13px; font-weight: 700; }
+  .diverge-chip { background: #fef3c7; color: #92400e; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 99px; border: 1px solid #fcd34d; }
+  .expand-arrow { color: #9ca3af; font-size: 12px; transition: transform 0.2s; }
+  .scanner-body { padding: 0 16px 14px; display: none; }
+  .scanner-body.open { display: block; }
+  .scanner-pillars { margin-top: 10px; }
+  .sp-row { display: grid; grid-template-columns: 180px 30px 1fr 48px; align-items: center; gap: 10px; padding: 5px 0; font-size: 12px; color: #4b5563; border-bottom: 1px solid #f9fafb; }
+  .sp-row:last-child { border-bottom: none; }
+  .sp-name { color: #6b7280; }
+  .sp-grade { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 20px; border-radius: 3px; font-size: 11px; font-weight: 700; }
+  .sp-bar-wrap { height: 8px; background: #f1f5f9; border-radius: 99px; overflow: hidden; }
+  .sp-bar { height: 100%; border-radius: 99px; }
+  .sp-score { text-align: right; font-weight: 600; font-size: 11px; color: #374151; }
+  .evidence-section { margin-top: 12px; padding-top: 10px; border-top: 1px solid #f1f5f9; }
+  .evidence-label { font-size: 11px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .evidence-link { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: #2563eb; text-decoration: none; margin-right: 12px; }
+  .evidence-link:hover { text-decoration: underline; }
+  .diverge-warning { background: #fffbeb; border: 1px solid #fcd34d; border-radius: 6px; padding: 8px 12px; margin-top: 10px; font-size: 12px; color: #92400e; }
+
+  /* ── Compare CTA ── */
+  .compare-cta { background: #fff; border-radius: 12px; padding: 20px 28px; border: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: space-between; }
+  .cta-text { font-size: 14px; color: #374151; }
+  .cta-text strong { color: #111827; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; padding: 8px 16px; }
+  .btn-primary { background: #1d4ed8; color: #fff; }
+  .btn-secondary { background: #f1f5f9; color: #374151; border: 1px solid #e2e8f0; }
+  .btn-sm { padding: 5px 11px; font-size: 12px; }
+
+  /* ── Stacked layout note ── */
+  .layout-annotation { font-size: 11px; color: #9ca3af; background: #f8fafc; border: 1px dashed #d1d5db; border-radius: 6px; padding: 8px 12px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+</style>
+</head>
+<body>
+
+<div class="topnav">
+  <span class="logo">CSA Risk Rubric</span>
+  <span class="sep">/</span>
+  <span class="breadcrumb">
+    <a href="#">Browse</a> &rsaquo; <a href="#">AI Models</a> &rsaquo; Claude Sonnet 4.6 (Azure)
+  </span>
+</div>
+
+<div class="page">
+
+  <!-- STALE WARNING (conditional, shown here for wireframe coverage) -->
+  <div class="stale-banner">
+    <span class="icon">⚠️</span>
+    <span>One or more scanner results are older than 90 days. Scores may not reflect the latest model version.</span>
+  </div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-left">
+      <div class="service-type-chip">🧠 AI Model</div>
+      <div class="service-name">Claude Sonnet 4.6</div>
+      <div class="service-subtitle">Anthropic &mdash; via Azure AI Foundry</div>
+      <div class="meta-grid">
+        <div class="meta-item">
+          <span class="meta-label">Engine Provider</span>
+          <span class="meta-value">Anthropic</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Platform</span>
+          <span class="meta-value">Azure AI Foundry</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Model Version</span>
+          <span class="meta-value">4.6 (claude-sonnet-4-6)</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Modalities</span>
+          <span class="meta-value">Text, Vision</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Last Scanned</span>
+          <span class="meta-value">2026-06-01</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Listing</span>
+          <span class="meta-value"><a class="meta-link" href="#">azure.microsoft.com/…</a></span>
+        </div>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="composite-block">
+        <div class="composite-label">Composite Score</div>
+        <div class="composite-grade">B</div>
+        <div class="composite-score">847 / 1000</div>
+        <div class="composite-desc">Weighted avg of 6 pillars</div>
+      </div>
+      <div class="confidence-block">
+        <span class="conf-icon">🔬</span>
+        <span class="conf-text">Confidence: <span class="conf-count">3 scanners</span></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="layout-annotation">
+    📐 Wireframe note: service type determines which metadata fields appear (models show engine/platform/version; MCP servers show target service/provider tier/hosting type).
+  </div>
+
+  <!-- PILLAR BREAKDOWN -->
+  <div class="pillars-card">
+    <div class="section-title">Pillar Breakdown — Aggregate (mean of 3 scanners)</div>
+    <div class="pillar-row">
+      <span class="pillar-name">Transparency <span class="weight-tag">16%</span></span>
+      <span class="pillar-grade gb">B</span>
+      <div class="pillar-bar-wrap"><div class="pillar-bar bar-b" style="width:83%"></div></div>
+      <span class="pillar-score">830 <small>/1000</small></span>
+    </div>
+    <div class="pillar-row">
+      <span class="pillar-name">Reliability <span class="weight-tag">16%</span></span>
+      <span class="pillar-grade ga">A</span>
+      <div class="pillar-bar-wrap"><div class="pillar-bar bar-a" style="width:91%"></div></div>
+      <span class="pillar-score">910 <small>/1000</small></span>
+    </div>
+    <div class="pillar-row">
+      <span class="pillar-name">Security <span class="weight-tag">20%</span></span>
+      <span class="pillar-grade gb">B</span>
+      <div class="pillar-bar-wrap"><div class="pillar-bar bar-b" style="width:86%"></div></div>
+      <span class="pillar-score">860 <small>/1000</small></span>
+    </div>
+    <div class="pillar-row">
+      <span class="pillar-name">Privacy <span class="weight-tag">16%</span></span>
+      <span class="pillar-grade gb">B</span>
+      <div class="pillar-bar-wrap"><div class="pillar-bar bar-b" style="width:82%"></div></div>
+      <span class="pillar-score">820 <small>/1000</small></span>
+    </div>
+    <div class="pillar-row">
+      <span class="pillar-name">Safety &amp; Societal Impacts <span class="weight-tag">16%</span></span>
+      <span class="pillar-grade gb">B</span>
+      <div class="pillar-bar-wrap"><div class="pillar-bar bar-b" style="width:80%"></div></div>
+      <span class="pillar-score">800 <small>/1000</small></span>
+    </div>
+    <div class="pillar-row warn-pillar">
+      <span class="pillar-name">Excessive Agency <span class="weight-tag">16%</span></span>
+      <span class="pillar-grade gc">C</span>
+      <div class="pillar-bar-wrap"><div class="pillar-bar bar-c" style="width:76%"></div></div>
+      <span class="pillar-score">760 <small>/1000</small></span>
+    </div>
+  </div>
+
+  <!-- PER-SCANNER BREAKDOWN -->
+  <div class="scanners-card">
+    <div class="section-title">Per-Scanner Breakdown</div>
+
+    <!-- Scanner 1 — expanded by default for wireframe -->
+    <div class="scanner-block">
+      <div class="scanner-header" onclick="toggle(this)">
+        <span class="scanner-name">🔍 RiskRubric Scanner powered by HiddenLayer</span>
+        <span class="scanner-date">Scanned 2026-06-01</span>
+        <span class="scanner-composite" style="color:#16a34a">B &nbsp;855</span>
+        <span class="expand-arrow">▼</span>
+      </div>
+      <div class="scanner-body open">
+        <div class="scanner-pillars">
+          <div class="sp-row">
+            <span class="sp-name">Transparency</span>
+            <span class="sp-grade gb">B</span>
+            <div class="sp-bar-wrap"><div class="sp-bar bar-b" style="width:84%"></div></div>
+            <span class="sp-score">840</span>
+          </div>
+          <div class="sp-row">
+            <span class="sp-name">Reliability</span>
+            <span class="sp-grade ga">A</span>
+            <div class="sp-bar-wrap"><div class="sp-bar bar-a" style="width:93%"></div></div>
+            <span class="sp-score">930</span>
+          </div>
+          <div class="sp-row">
+            <span class="sp-name">Security</span>
+            <span class="sp-grade gb">B</span>
+            <div class="sp-bar-wrap"><div class="sp-bar bar-b" style="width:87%"></div></div>
+            <span class="sp-score">870</span>
+          </div>
+          <div class="sp-row">
+            <span class="sp-name">Privacy</span>
+            <span class="sp-grade gb">B</span>
+            <div class="sp-bar-wrap"><div class="sp-bar bar-b" style="width:83%"></div></div>
+            <span class="sp-score">830</span>
+          </div>
+          <div class="sp-row">
+            <span class="sp-name">Safety &amp; Societal Impacts</span>
+            <span class="sp-grade gb">B</span>
+            <div class="sp-bar-wrap"><div class="sp-bar bar-b" style="width:82%"></div></div>
+            <span class="sp-score">820</span>
+          </div>
+          <div class="sp-row">
+            <span class="sp-name">Excessive Agency</span>
+            <span class="sp-grade gb">B</span>
+            <div class="sp-bar-wrap"><div class="sp-bar bar-b" style="width:80%"></div></div>
+            <span class="sp-score">800</span>
+          </div>
+        </div>
+        <div class="evidence-section">
+          <div class="evidence-label">Evidence &amp; Methodology</div>
+          <a class="evidence-link" href="#">📄 Full report (PDF)</a>
+          <a class="evidence-link" href="#">🔗 Methodology docs</a>
+          <a class="evidence-link" href="#">📊 Raw evidence bundle</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scanner 2 — collapsed -->
+    <div class="scanner-block">
+      <div class="scanner-header" onclick="toggle(this)">
+        <span class="scanner-name">🔍 RiskRubric Scanner powered by Wiz</span>
+        <span class="scanner-date">Scanned 2026-05-28</span>
+        <span class="scanner-composite" style="color:#16a34a">B &nbsp;861</span>
+        <span class="expand-arrow">▶</span>
+      </div>
+      <div class="scanner-body">
+        <div class="scanner-pillars">
+          <div class="sp-row"><span class="sp-name">Transparency</span><span class="sp-grade gb">B</span><div class="sp-bar-wrap"><div class="sp-bar bar-b" style="width:83%"></div></div><span class="sp-score">830</span></div>
+          <div class="sp-row"><span class="sp-name">Reliability</span><span class="sp-grade ga">A</span><div class="sp-bar-wrap"><div class="sp-bar bar-a" style="width:92%"></div></div><span class="sp-score">920</span></div>
+          <div class="sp-row"><span class="sp-name">Security</span><span class="sp-grade ga">A</span><div class="sp-bar-wrap"><div class="sp-bar bar-a" style="width:90%"></div></div><span class="sp-score">900</span></div>
+          <div class="sp-row"><span class="sp-name">Privacy</span><span class="sp-grade gb">B</span><div class="sp-bar-wrap"><div class="sp-bar bar-b" style="width:82%"></div></div><span class="sp-score">820</span></div>
+          <div class="sp-row"><span class="sp-name">Safety &amp; Societal Impacts</span><span class="sp-grade gb">B</span><div class="sp-bar-wrap"><div class="sp-bar bar-b" style="width:82%"></div></div><span class="sp-score">820</span></div>
+          <div class="sp-row"><span class="sp-name">Excessive Agency</span><span class="sp-grade gc">C</span><div class="sp-bar-wrap"><div class="sp-bar bar-c" style="width:77%"></div></div><span class="sp-score">770</span></div>
+        </div>
+        <div class="evidence-section">
+          <div class="evidence-label">Evidence &amp; Methodology</div>
+          <a class="evidence-link" href="#">📄 Full report (PDF)</a>
+          <a class="evidence-link" href="#">🔗 Methodology docs</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scanner 3 — collapsed, has divergence flag -->
+    <div class="scanner-block">
+      <div class="scanner-header" onclick="toggle(this)">
+        <span class="scanner-name">🔍 RiskRubric Scanner powered by Lacework</span>
+        <span class="scanner-date">Scanned 2026-04-10 &nbsp;</span>
+        <span style="font-size:11px;color:#92400e;background:#fef3c7;border:1px solid #fcd34d;border-radius:99px;padding:2px 7px;font-weight:600;">⚠ Stale (90d+)</span>&nbsp;
+        <span class="scanner-composite" style="color:#d97706">B &nbsp;825</span>
+        <span class="diverge-chip">↕ Diverges</span>
+        <span class="expand-arrow">▶</span>
+      </div>
+      <div class="scanner-body">
+        <div class="diverge-warning">
+          ↕ This scanner's Excessive Agency score (710) diverges from the aggregate by more than 100 points. Review this scanner's methodology for context.
+        </div>
+        <div class="scanner-pillars" style="margin-top:8px">
+          <div class="sp-row"><span class="sp-name">Transparency</span><span class="sp-grade gb">B</span><div class="sp-bar-wrap"><div class="sp-bar bar-b" style="width:82%"></div></div><span class="sp-score">820</span></div>
+          <div class="sp-row"><span class="sp-name">Reliability</span><span class="sp-grade ga">A</span><div class="sp-bar-wrap"><div class="sp-bar bar-a" style="width:88%"></div></div><span class="sp-score">880</span></div>
+          <div class="sp-row"><span class="sp-name">Security</span><span class="sp-grade gb">B</span><div class="sp-bar-wrap"><div class="sp-bar bar-b" style="width:82%"></div></div><span class="sp-score">820</span></div>
+          <div class="sp-row"><span class="sp-name">Privacy</span><span class="sp-grade gb">B</span><div class="sp-bar-wrap"><div class="sp-bar bar-b" style="width:81%"></div></div><span class="sp-score">810</span></div>
+          <div class="sp-row"><span class="sp-name">Safety &amp; Societal Impacts</span><span class="sp-grade gc">C</span><div class="sp-bar-wrap"><div class="sp-bar bar-c" style="width:76%"></div></div><span class="sp-score">760</span></div>
+          <div class="sp-row"><span class="sp-name">Excessive Agency</span><span class="sp-grade gc">C</span><div class="sp-bar-wrap"><div class="sp-bar bar-c" style="width:71%"></div></div><span class="sp-score">710</span></div>
+        </div>
+        <div class="evidence-section">
+          <div class="evidence-label">Evidence &amp; Methodology</div>
+          <a class="evidence-link" href="#">📄 Full report (PDF)</a>
+          <a class="evidence-link" href="#">🔗 Methodology docs</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- COMPARE CTA -->
+  <div class="compare-cta">
+    <div class="cta-text">
+      <strong>Compare this service</strong> with others side-by-side across all six pillars.
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-secondary btn-sm">↩ Back to Browse</button>
+      <button class="btn btn-primary btn-sm">＋ Add to Compare</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function toggle(header) {
+  const body = header.nextElementSibling;
+  const arrow = header.querySelector('.expand-arrow');
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  arrow.textContent = isOpen ? '▶' : '▼';
+}
+</script>
+</body>
+</html>
