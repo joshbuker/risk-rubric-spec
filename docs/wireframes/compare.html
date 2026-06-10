@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Compare Services — Risk Rubric v2 Wireframe</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 14px; background: #f0f2f5; color: #1a1a2e; min-height: 100vh; }
+
+  /* ── Top nav ── */
+  .topnav { background: #1a1a2e; color: #fff; padding: 10px 24px; display: flex; align-items: center; gap: 16px; }
+  .topnav .logo { font-weight: 700; font-size: 16px; color: #60a5fa; letter-spacing: -0.3px; }
+  .topnav .sep { color: #4b5563; }
+  .topnav .breadcrumb { color: #9ca3af; font-size: 13px; }
+  .topnav .breadcrumb a { color: #93c5fd; text-decoration: none; }
+  .topnav .breadcrumb a:hover { text-decoration: underline; }
+
+  /* ── Page layout ── */
+  .page { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
+
+  /* ── Page header ── */
+  .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .page-title { font-size: 22px; font-weight: 700; color: #111827; }
+  .page-subtitle { font-size: 13px; color: #6b7280; margin-top: 2px; }
+  .header-actions { display: flex; align-items: center; gap: 10px; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; padding: 8px 16px; }
+  .btn-primary { background: #1d4ed8; color: #fff; }
+  .btn-secondary { background: #f1f5f9; color: #374151; border: 1px solid #e2e8f0; }
+  .btn-ghost { background: transparent; color: #6b7280; border: 1px dashed #d1d5db; }
+  .btn-ghost:hover { background: #f9fafb; border-style: solid; }
+  .btn-disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn-sm { padding: 5px 11px; font-size: 12px; }
+  .btn-xs { padding: 3px 8px; font-size: 11px; }
+
+  /* ── Grade badges ── */
+  .grade-badge { display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; font-weight: 700; }
+  .grade-lg { width: 52px; height: 44px; font-size: 28px; border-radius: 8px; }
+  .grade-sm { width: 30px; height: 24px; font-size: 12px; border-radius: 4px; }
+  .ga { background: #dcfce7; color: #166534; }
+  .gb { background: #d1fae5; color: #065f46; }
+  .gc { background: #fef9c3; color: #854d0e; }
+  .gd { background: #ffedd5; color: #9a3412; }
+  .gf { background: #fee2e2; color: #991b1b; }
+
+  /* ── Bar ── */
+  .bar-wrap { height: 8px; background: #f1f5f9; border-radius: 99px; overflow: hidden; }
+  .bar { height: 100%; border-radius: 99px; }
+  .bar-a { background: #22c55e; }
+  .bar-b { background: #4ade80; }
+  .bar-c { background: #facc15; }
+  .bar-d { background: #fb923c; }
+  .bar-f { background: #ef4444; }
+
+  /* ── Compare grid ── */
+  .compare-card { background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; }
+  .compare-grid { display: grid; grid-template-columns: 190px repeat(3, minmax(190px, 1fr)) 140px; border-collapse: collapse; }
+
+  /* ── Column header: service card ── */
+  .col-label { /* left-side row label column */ }
+  .col-service {
+    border-left: 1px solid #e5e7eb;
+    position: relative;
+  }
+  .col-add {
+    border-left: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ── Service header cells ── */
+  .svc-header-cell {
+    padding: 20px 18px 16px;
+    border-bottom: 2px solid #e5e7eb;
+    background: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .label-header-cell {
+    padding: 20px 18px 16px;
+    border-bottom: 2px solid #e5e7eb;
+    background: #f8fafc;
+    display: flex;
+    align-items: flex-end;
+  }
+  .label-header-text {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #9ca3af;
+    letter-spacing: 0.5px;
+  }
+  .add-header-cell {
+    padding: 20px 14px 16px;
+    border-bottom: 2px solid #e5e7eb;
+    background: #f8fafc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .svc-type-chip { display: inline-flex; align-items: center; gap: 4px; background: #eff6ff; color: #1d4ed8; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 99px; border: 1px solid #bfdbfe; width: fit-content; }
+  .svc-name { font-size: 14px; font-weight: 700; color: #111827; line-height: 1.3; }
+  .svc-sub { font-size: 11px; color: #9ca3af; }
+  .svc-actions { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+  .remove-btn { background: none; border: none; color: #9ca3af; cursor: pointer; font-size: 16px; padding: 2px 4px; border-radius: 4px; line-height: 1; }
+  .remove-btn:hover { background: #fee2e2; color: #dc2626; }
+
+  .composite-mini { display: flex; align-items: center; gap: 10px; }
+  .composite-info { display: flex; flex-direction: column; gap: 2px; }
+  .composite-score-text { font-size: 20px; font-weight: 700; color: #374151; }
+  .composite-conf { font-size: 11px; color: #6b7280; }
+  .stale-chip { display: inline-flex; align-items: center; gap: 3px; background: #fffbeb; color: #92400e; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 99px; border: 1px solid #fcd34d; width: fit-content; }
+
+  /* ── Composite summary row ── */
+  .summary-row-label {
+    padding: 14px 18px;
+    background: #f8fafc;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+  }
+  .summary-row-cell {
+    padding: 14px 18px;
+    background: #f8fafc;
+    border-bottom: 1px solid #e5e7eb;
+    border-left: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+  }
+  .summary-row-add {
+    background: #f8fafc;
+    border-bottom: 1px solid #e5e7eb;
+    border-left: 1px solid #e5e7eb;
+  }
+
+  /* ── Pillar rows ── */
+  .row-label {
+    padding: 12px 18px;
+    border-bottom: 1px solid #f3f4f6;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    background: #fff;
+  }
+  .row-label:last-child { border-bottom: none; }
+  .pillar-name-text { font-size: 13px; font-weight: 600; color: #374151; }
+  .pillar-weight-text { font-size: 10px; color: #9ca3af; }
+
+  .pillar-cell {
+    padding: 12px 18px;
+    border-bottom: 1px solid #f3f4f6;
+    border-left: 1px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: #fff;
+  }
+  .pillar-cell.best { background: #f0fdf4; }
+  .pillar-cell.worst { background: #fff7f7; }
+  .pillar-cell:last-child { border-bottom: none; }
+
+  .pillar-cell-top { display: flex; align-items: center; gap: 8px; }
+  .pillar-score-num { font-size: 14px; font-weight: 700; color: #111827; }
+  .best-chip { font-size: 10px; color: #15803d; font-weight: 600; }
+  .worst-chip { font-size: 10px; color: #b91c1c; font-weight: 600; }
+
+  .pillar-cell-add {
+    border-bottom: 1px solid #f3f4f6;
+    border-left: 1px solid #e5e7eb;
+    background: #fafafa;
+  }
+
+  /* ── Annotation strip ── */
+  .annotation { font-size: 11px; color: #9ca3af; background: #f8fafc; border: 1px dashed #d1d5db; border-radius: 6px; padding: 8px 12px; margin-top: 16px; display: flex; align-items: center; gap: 8px; }
+
+  /* ── Bottom actions ── */
+  .bottom-bar { display: flex; align-items: center; justify-content: space-between; margin-top: 20px; }
+
+  /* ── Scrollable wrapper on narrow viewports ── */
+  .compare-scroll { overflow-x: auto; }
+</style>
+</head>
+<body>
+
+<div class="topnav">
+  <span class="logo">CSA Risk Rubric</span>
+  <span class="sep">/</span>
+  <span class="breadcrumb">
+    <a href="#">Browse</a> &rsaquo; Compare
+  </span>
+</div>
+
+<div class="page">
+
+  <!-- ── Page header ── -->
+  <div class="page-header">
+    <div>
+      <div class="page-title">Compare Services</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:4px;">
+        <span style="display:inline-flex;align-items:center;gap:5px;background:#eff6ff;color:#1d4ed8;font-size:11px;font-weight:600;padding:3px 10px;border-radius:99px;border:1px solid #bfdbfe;">🧠 AI Models</span>
+        <span class="page-subtitle">Comparing 3 services &mdash; 1 more can be added (max 4)</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-secondary">Clear all</button>
+    </div>
+  </div>
+
+  <!-- ── Compare table ── -->
+  <div class="compare-card">
+    <div class="compare-scroll">
+    <div class="compare-grid">
+
+      <!-- ═══════════════════════════════════════════════════ -->
+      <!-- ROW 1: Service header cards                        -->
+      <!-- ═══════════════════════════════════════════════════ -->
+      <div class="label-header-cell">
+        <span class="label-header-text">Service</span>
+      </div>
+
+      <!-- Service A: Claude Sonnet 4.6 (Direct API) -->
+      <div class="svc-header-cell col-service">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <span class="svc-type-chip">🧠 AI Model</span>
+          <button class="remove-btn" title="Remove from comparison">×</button>
+        </div>
+        <div>
+          <div class="svc-name">Claude Sonnet 4.6</div>
+          <div class="svc-sub">Anthropic · Direct API</div>
+        </div>
+        <div class="composite-mini">
+          <span class="grade-badge grade-lg ga">A</span>
+          <div class="composite-info">
+            <span class="composite-score-text">923</span>
+            <span class="composite-conf">C=3 scanners</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Service B: GPT-4o (Azure OpenAI) — stale -->
+      <div class="svc-header-cell col-service">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <span class="svc-type-chip">🧠 AI Model</span>
+          <button class="remove-btn" title="Remove from comparison">×</button>
+        </div>
+        <div>
+          <div class="svc-name">GPT-4o</div>
+          <div class="svc-sub">OpenAI · Azure OpenAI</div>
+        </div>
+        <div class="composite-mini">
+          <span class="grade-badge grade-lg gb">B</span>
+          <div class="composite-info">
+            <span class="composite-score-text">841</span>
+            <span class="composite-conf">C=2 scanners</span>
+            <span class="stale-chip">⚠ Stale &gt;90d</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Service C: Gemini 1.5 Pro (GCP Vertex) -->
+      <div class="svc-header-cell col-service">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <span class="svc-type-chip">🧠 AI Model</span>
+          <button class="remove-btn" title="Remove from comparison">×</button>
+        </div>
+        <div>
+          <div class="svc-name">Gemini 1.5 Pro</div>
+          <div class="svc-sub">Google · GCP Vertex AI</div>
+        </div>
+        <div class="composite-mini">
+          <span class="grade-badge grade-lg gc">C</span>
+          <div class="composite-info">
+            <span class="composite-score-text">762</span>
+            <span class="composite-conf">C=1 scanner</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add another -->
+      <div class="add-header-cell col-add">
+        <button class="btn btn-ghost" style="flex-direction:column;gap:6px;padding:16px 14px;height:100%;width:100%;border-radius:0;">
+          <span style="font-size:24px;color:#9ca3af;">+</span>
+          <span style="font-size:12px;color:#9ca3af;text-align:center;">Add service<br>from Browse</span>
+        </button>
+      </div>
+
+
+      <!-- ═══════════════════════════════════════════════════ -->
+      <!-- ROW 2: Composite score summary (sticky divider)    -->
+      <!-- ═══════════════════════════════════════════════════ -->
+      <div class="summary-row-label">
+        <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:#9ca3af;letter-spacing:0.5px;">Composite Score</span>
+      </div>
+      <div class="summary-row-cell">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="grade-badge grade-sm ga">A</span>
+          <div>
+            <div style="font-size:15px;font-weight:700;color:#111827;">923</div>
+            <div style="font-size:10px;color:#6b7280;">weighted avg</div>
+          </div>
+        </div>
+      </div>
+      <div class="summary-row-cell">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="grade-badge grade-sm gb">B</span>
+          <div>
+            <div style="font-size:15px;font-weight:700;color:#111827;">841</div>
+            <div style="font-size:10px;color:#6b7280;">weighted avg</div>
+          </div>
+        </div>
+      </div>
+      <div class="summary-row-cell">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="grade-badge grade-sm gc">C</span>
+          <div>
+            <div style="font-size:15px;font-weight:700;color:#111827;">762</div>
+            <div style="font-size:10px;color:#6b7280;">weighted avg</div>
+          </div>
+        </div>
+      </div>
+      <div class="summary-row-add"></div>
+
+
+      <!-- ═══════════════════════════════════════════════════ -->
+      <!-- PILLAR ROWS                                        -->
+      <!-- ═══════════════════════════════════════════════════ -->
+
+      <!-- Transparency (16%) -->
+      <div class="row-label">
+        <span class="pillar-name-text">Transparency</span>
+        <span class="pillar-weight-text">16% weight</span>
+      </div>
+      <div class="pillar-cell best">
+        <div class="pillar-cell-top">
+          <span class="grade-badge grade-sm ga">A</span>
+          <span class="pillar-score-num">910</span>
+          <span class="best-chip">▲ Best</span>
+        </div>
+        <div class="bar-wrap"><div class="bar bar-a" style="width:91%;"></div></div>
+      </div>
+      <div class="pillar-cell">
+        <div class="pillar-cell-top">
+          <span class="grade-badge grade-sm gb">B</span>
+          <span class="pillar-score-num">870</span>
+        </div>
+        <div class="bar-wrap"><div class="bar bar-b" style="width:87%;"></div></div>
+      </div>
+      <div class="pillar-cell worst">
+        <div class="pillar-cell-top">
+          <span class="grade-badge grade-sm gc">C</span>
+          <span class="pillar-score-num">710</span>
+          <span class="worst-chip">▼ Low</span>
+        </div>
+        <div class="bar-wrap"><div class="bar bar-c" style="width:71%;"></div></div>
+      </div>
+      <div class="pillar-cell-add"></div>
+
+      <!-- Reliability (16%) -->
+      <div class="row-label">
+        <span class="pillar-name-text">Reliability</span>
+        <span class="pillar-weight-text">16% weight</span>
+      </div>
+      <div class="pillar-cell best">
+        <div class="pillar-cell-top">
+          <span class="grade-badge grade-sm ga">A</span>
+          <span class="pillar-score-num">948</span>
+          <span class="best-chip">▲ Best</span>
+        </div>
+        <div class="bar-wrap"><div class="bar bar-a" style="width:94.8%;"></div></div>
+      </div>
+      <div class="pillar-cell">
+        <div class="pillar-cell-top">
+          <span class="grade-badge grade-sm ga">A</span>
+          <span class="pillar-score-num">930</span>
+        </div>
+        <div class="bar-wrap"><div class="bar bar-a" style="width:93%;"></div></div>
+      </div>
+      <div class="pillar-cell worst">
+        <div class="pillar-cell-top">
+          <span class="grade-badge grade-sm gb">B</span>
+          <span class="pillar-score-num">820</span>
+          <span class="worst-chip">▼ Low</span>
+        </div>
+        <div class="bar-wrap"><div class="bar bar-b" style="width:82%;"></div></div>
+      </div>
+      <div class="pillar-cell-add"></div>
+
+      <!-- Security (20%) -->
+      <div class="row-label">
+        <span class="pillar-name-text">Security</span>
+        <span class="pillar-weight-text">20% weight · highest</span>
+      </div>
+      <div class="pillar-cell best">
+        <div class="pillar-cell-top">
+          <span class="grade-badge grade-sm ga">A</span>
+          <span class="pillar-score-num">905</span>
+          <span class="best-chip">▲ Best</span>
+        </div>
+        <div class="bar-wrap"><div class="bar bar-a" style="width:90.5%;"></div></div>
+      </div>
+      <div class="pillar-cell">
+        <div class="pillar-cell-top">
+          <span class="grade-badge grade-sm gb">B</span>
+          <span class="pillar-score-num">810</span>
+        </div>
+        <div class="bar-wrap"><div class="bar bar-b" style="width:81%;"></div></div>
+      </div>
+      <div class="pillar-cell worst">
+        <div class="pillar-cell-top">
+          <span class="grade-badge grade-sm gc">C</span>
+          <span class="pillar-score-num">740</span>
+          <span class="worst-chip">▼ Low</span>
+        </div>
+        <div class="bar-wrap"><div class="bar bar-c" style="width:74%;"></div></div>
+      </div>
+      <div class="pillar-cell-add"></div>
+
+      <!-- Privacy (16%) -->
+      <div class="row-label">
+        <span class="pillar-name-text">Privacy</span>
+        <span class="pillar-weight-text">16% weight</span>
+      </div>
+      <div class="pillar-cell best">
+        <div class="pillar-cell-top">
+          <span class="grade-badge grade-sm ga">A</span>
+          <span class="pillar-score-num">935</span>
+          <span class="best-chip">▲ Best</span>
+        </div>
+        <div class="bar-wrap"><div class="bar bar-a" style="width:93.5%;"></div></div>
+      </div>
+      <div class="pillar-cell">
+        <div class="pillar-cell-top">
+          <span class="grade-badge grade-sm gb">B</span>
+          <span class="pillar-score-num">800</span>
+        </div>
+        <div class="bar-wrap"><div class="bar bar-b" style="width:80%;"></div></div>
+      </div>
+      <div class="pillar-cell worst">
+        <div class="pillar-cell-top">
+          <span class="grade-badge grade-sm gd">D</span>
+          <span class="pillar-score-num">640</span>
+          <span class="worst-chip">▼ Low</span>
+        </div>
+        <div class="bar-wrap"><div class="bar bar-d" style="width:64%;"></div></div>
+      </div>
+      <div class="pillar-cell-add"></div>
+
+      <!-- Safety & Societal Impacts (16%) -->
+      <div class="row-label">
+        <span class="pillar-name-text">Safety &amp; Societal Impacts</span>
+        <span class="pillar-weight-text">16% weight</span>
+      </div>
+      <div class="pillar-cell best">
+        <div class="pillar-cell-top">
+          <span class="grade-badge grade-sm ga">A</span>
+          <span class="pillar-score-num">960</span>
+          <span class="best-chip">▲ Best</span>
+        </div>
+        <div class="bar-wrap"><div class="bar bar-a" style="width:96%;"></div></div>
+      </div>
+      <div class="pillar-cell">
+        <div class="pillar-cell-top">
+          <span class="grade-badge grade-sm gb">B</span>
+          <span class="pillar-score-num">855</span>
+        </div>
+        <div class="bar-wrap"><div class="bar bar-b" style="width:85.5%;"></div></div>
+      </div>
+      <div class="pillar-cell worst">
+        <div class="pillar-cell-top">
+          <span class="grade-badge grade-sm gb">B</span>
+          <span class="pillar-score-num">800</span>
+          <span class="worst-chip">▼ Low</span>
+        </div>
+        <div class="bar-wrap"><div class="bar bar-b" style="width:80%;"></div></div>
+      </div>
+      <div class="pillar-cell-add"></div>
+
+      <!-- Excessive Agency (16%) -->
+      <div class="row-label" style="border-bottom:none;">
+        <span class="pillar-name-text">Excessive Agency</span>
+        <span class="pillar-weight-text">16% weight · new in v2</span>
+      </div>
+      <div class="pillar-cell best" style="border-bottom:none;">
+        <div class="pillar-cell-top">
+          <span class="grade-badge grade-sm ga">A</span>
+          <span class="pillar-score-num">905</span>
+          <span class="best-chip">▲ Best</span>
+        </div>
+        <div class="bar-wrap"><div class="bar bar-a" style="width:90.5%;"></div></div>
+      </div>
+      <div class="pillar-cell" style="border-bottom:none;">
+        <div class="pillar-cell-top">
+          <span class="grade-badge grade-sm gc">C</span>
+          <span class="pillar-score-num">720</span>
+        </div>
+        <div class="bar-wrap"><div class="bar bar-c" style="width:72%;"></div></div>
+      </div>
+      <div class="pillar-cell worst" style="border-bottom:none;">
+        <div class="pillar-cell-top">
+          <span class="grade-badge grade-sm gf">F</span>
+          <span class="pillar-score-num">480</span>
+          <span class="worst-chip">▼ Low</span>
+        </div>
+        <div class="bar-wrap"><div class="bar bar-f" style="width:48%;"></div></div>
+      </div>
+      <div class="pillar-cell-add" style="border-bottom:none;"></div>
+
+    </div><!-- /compare-grid -->
+    </div><!-- /compare-scroll -->
+  </div><!-- /compare-card -->
+
+  <!-- ── Annotation ── -->
+  <div class="annotation">
+    <span>📝</span>
+    <span><strong>▲ Best / ▼ Low</strong> highlights the highest and lowest score per pillar across the comparison set. Comparisons are locked to one service type — adding a service from Browse automatically sets the type for the whole set.</span>
+  </div>
+
+  <!-- ── Bottom bar ── -->
+  <div class="bottom-bar">
+    <a href="#" style="color:#2563eb;font-size:13px;font-weight:500;text-decoration:none;">← Back to Browse</a>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-secondary btn-sm">Export CSV</button>
+      <button class="btn btn-primary btn-sm">Share comparison</button>
+    </div>
+  </div>
+
+</div><!-- /page -->
+</body>
+</html>
