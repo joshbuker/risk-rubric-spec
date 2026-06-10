@@ -636,11 +636,14 @@ def reject_flag(flag_id: str, db: Session = Depends(get_db)):
         }))
     db.flush()
 
-    # Move the score from old service to new service
-    score = db.query(Score).filter(
-        Score.service_id == flag.service_id,
-        Score.scanner_id == flag.scanner_id,
-    ).first()
+    # Move the latest score for this scanner from old service to new service.
+    # Scores are append-only so there may be multiple rows; move only the most recent.
+    score = (
+        db.query(Score)
+        .filter(Score.service_id == flag.service_id, Score.scanner_id == flag.scanner_id)
+        .order_by(Score.created_at.desc())
+        .first()
+    )
     if score:
         score.service_id = new_svc.id
 
@@ -700,6 +703,10 @@ class ScannerEditRequest(BaseModel):
     name: str | None = None
 
 
+class ConformanceRequest(BaseModel):
+    conformance_status: str  # "conformant" | "pending"
+
+
 @router.get("/scanners")
 def list_scanners(db: Session = Depends(get_db)):
     scanners = db.query(Scanner).order_by(Scanner.created_at).all()
@@ -710,6 +717,7 @@ def list_scanners(db: Session = Depends(get_db)):
             "org_name": s.org_name,
             "api_key_prefix": s.api_key_prefix,
             "status": s.status,
+            "conformance_status": s.conformance_status,
             "created_at": s.created_at.isoformat() if s.created_at else None,
             "last_used_at": s.last_used_at.isoformat() if s.last_used_at else None,
             "submission_count": db.query(func.count(Score.id))
@@ -730,6 +738,20 @@ def edit_scanner(scanner_id: str, body: ScannerEditRequest, db: Session = Depend
     return {"status": "updated"}
 
 
+@router.post("/scanners/{scanner_id}/set-conformance")
+def set_conformance(scanner_id: str, body: ConformanceRequest, db: Session = Depends(get_db)):
+    if body.conformance_status not in ("conformant", "pending"):
+        raise HTTPException(status_code=422, detail="conformance_status must be 'conformant' or 'pending'")
+    scanner = db.query(Scanner).filter(Scanner.id == scanner_id).first()
+    if not scanner:
+        raise HTTPException(status_code=404, detail="Scanner not found")
+    if scanner.status == "revoked":
+        raise HTTPException(status_code=409, detail="Cannot set conformance on a revoked scanner")
+    scanner.conformance_status = body.conformance_status
+    db.commit()
+    return {"status": "updated", "conformance_status": scanner.conformance_status}
+
+
 @router.post("/scanners/{scanner_id}/revoke")
 def revoke_scanner(scanner_id: str, db: Session = Depends(get_db)):
     scanner = db.query(Scanner).filter(Scanner.id == scanner_id).first()
@@ -738,6 +760,7 @@ def revoke_scanner(scanner_id: str, db: Session = Depends(get_db)):
     if scanner.status == "revoked":
         raise HTTPException(status_code=409, detail="Already revoked")
     scanner.status = "revoked"
+    scanner.conformance_status = "revoked"
     db.commit()
     return {"status": "revoked", "scanner_id": scanner_id}
 ```

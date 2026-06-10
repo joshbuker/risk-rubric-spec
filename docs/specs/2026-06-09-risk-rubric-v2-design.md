@@ -363,11 +363,11 @@ CSA staff only. Auth: JWT in prototype; Auth0 in production.
 
 ## 10. Timeline
 
-| Milestone | Target |
-|-----------|--------|
-| Concept paper + pilot | Q2 2026 |
-| First assessments live | Q3 2026 |
-| CSA STAR Registry integration | Q1 2027 |
+| Milestone | Target | Status |
+|-----------|--------|--------|
+| Concept paper published | 2026-06-08 | ✅ Done |
+| Initial platform rollout | 2026-08-04 (week of Black Hat / DEF CON) | In progress |
+| CSA STAR Registry integration | Q1 2027 | Planned |
 
 ---
 

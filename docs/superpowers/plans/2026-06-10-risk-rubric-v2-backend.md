@@ -40,17 +40,18 @@ backend/
       __init__.py
       base.py                             # declarative_base()
       session.py                          # engine, SessionLocal, get_db dependency
-      models.py                           # ALL ORM models (Service, ServiceModel,
-                                          #   ServiceMcpServer, Scanner, Score,
-                                          #   IdentityMatchFlag)
+      models.py                           # ALL ORM models (MethodologyVersion, Service,
+                                          #   ServiceModel, ServiceMcpServer, Scanner,
+                                          #   Score, IdentityMatchFlag, AuditLog)
     api/
       __init__.py
       v1/
         __init__.py
-        router.py                         # assembles scores + services + scanners routers
+        router.py                         # assembles scores + services + scanners + methodology
         scores.py                         # POST /api/v1/scores
         services.py                       # GET /api/v1/services, GET /api/v1/services/{id}
         scanners.py                       # GET /api/v1/scanners
+        methodology.py                    # GET /api/v1/methodology/current
     schemas/
       __init__.py
       scores.py                           # Pydantic request/response for submission
@@ -70,6 +71,7 @@ backend/
     test_keys.py                          # unit: generate, hash, verify
     test_api_submission.py                # integration: POST /api/v1/scores full flow
     test_api_services.py                  # integration: GET browse + detail
+    test_api_methodology.py               # integration: GET /methodology/current
 ```
 
 ---
@@ -217,7 +219,7 @@ from __future__ import annotations
 from datetime import datetime
 from uuid import uuid4
 from sqlalchemy import (
-    Column, String, Float, DateTime, JSON, Enum, UniqueConstraint,
+    Boolean, Column, Index, String, Float, DateTime, JSON, Enum,
     ForeignKey, func,
 )
 from sqlalchemy.orm import relationship
@@ -226,6 +228,17 @@ from app.db.base import Base
 
 def _sid(prefix: str) -> str:
     return f"{prefix}_{uuid4().hex[:8]}"
+
+
+class MethodologyVersion(Base):
+    __tablename__ = "methodology_versions"
+
+    id = Column(String, primary_key=True, default=lambda: _sid("mtd"))
+    version = Column(String, nullable=False, unique=True)  # e.g. "2.0.0"
+    pillar_weights = Column(JSON, nullable=False)           # {"transparency": 0.16, ...}
+    released_at = Column(DateTime, nullable=False)
+    is_current = Column(Boolean, nullable=False, default=False)
+    created_at = Column(DateTime, default=func.now())
 
 
 class Service(Base):
@@ -239,6 +252,7 @@ class Service(Base):
         nullable=False,
     )
     external_id = Column(String, nullable=True, unique=True)
+    is_synthetic = Column(Boolean, nullable=False, default=False)
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 
@@ -283,14 +297,19 @@ class Scanner(Base):
     __tablename__ = "scanners"
 
     id = Column(String, primary_key=True, default=lambda: _sid("scn"))
-    name = Column(String, nullable=False)       # "RiskRubric scanner powered by PointGuard"
-    org_name = Column(String, nullable=False)   # "PointGuard"
+    name = Column(String, nullable=False)           # "RiskRubric scanner powered by PointGuard"
+    org_name = Column(String, nullable=False)        # "PointGuard"
     api_key_hash = Column(String, nullable=False)
     api_key_prefix = Column(String, nullable=False)
     status = Column(
         Enum("active", "revoked", name="scanner_status_enum"),
         nullable=False,
         default="active",
+    )
+    conformance_status = Column(
+        Enum("conformant", "pending", "revoked", name="scanner_conformance_enum"),
+        nullable=False,
+        default="pending",
     )
     created_at = Column(DateTime, default=func.now())
     last_used_at = Column(DateTime, nullable=True)
@@ -304,6 +323,7 @@ class Score(Base):
     id = Column(String, primary_key=True, default=lambda: _sid("scr"))
     service_id = Column(String, ForeignKey("services.id"), nullable=False)
     scanner_id = Column(String, ForeignKey("scanners.id"), nullable=False)
+    methodology_version_id = Column(String, ForeignKey("methodology_versions.id"), nullable=True)
     transparency_score = Column(Float, nullable=False)
     reliability_score = Column(Float, nullable=False)
     security_score = Column(Float, nullable=False)
@@ -311,13 +331,17 @@ class Score(Base):
     safety_societal_score = Column(Float, nullable=False)
     excessive_agency_score = Column(Float, nullable=False)
     composite_score = Column(Float, nullable=False)
+    coi_disclosed = Column(Boolean, nullable=False, default=False)
     scored_at = Column(DateTime, nullable=False)
     created_at = Column(DateTime, default=func.now())
 
     service = relationship("Service", back_populates="scores")
     scanner = relationship("Scanner", back_populates="scores")
 
-    __table_args__ = (UniqueConstraint("service_id", "scanner_id", name="uq_score_service_scanner"),)
+    # Append-only: no unique constraint. Index for efficient "latest per scanner" queries.
+    __table_args__ = (
+        Index("ix_score_service_scanner_created", "service_id", "scanner_id", "created_at"),
+    )
 
 
 class IdentityMatchFlag(Base):
@@ -337,6 +361,18 @@ class IdentityMatchFlag(Base):
     resolved_at = Column(DateTime, nullable=True)
 
     service = relationship("Service", back_populates="flags")
+
+
+class AuditLog(Base):
+    __tablename__ = "audit_log"
+
+    id = Column(String, primary_key=True, default=lambda: _sid("aud"))
+    entity_type = Column(String, nullable=False)   # "score", "scanner", "flag"
+    entity_id = Column(String, nullable=False)
+    action = Column(String, nullable=False)         # "submitted", "revoked", "accepted", etc.
+    actor = Column(String, nullable=True)           # scanner_id, "admin", or None
+    detail = Column(JSON, nullable=True)
+    created_at = Column(DateTime, default=func.now())
 ```
 
 - [ ] **Step 2: Verify models import cleanly**
@@ -433,7 +469,7 @@ cd backend
 alembic revision --autogenerate -m "initial schema"
 ```
 
-Expected: creates `alembic/versions/<hash>_initial_schema.py`. Verify the generated file creates all tables: `services`, `service_models`, `service_mcp_servers`, `scanners`, `scores`, `identity_match_flags`, plus all ENUMs.
+Expected: creates `alembic/versions/<hash>_initial_schema.py`. Verify the generated file creates all tables: `methodology_versions`, `services`, `service_models`, `service_mcp_servers`, `scanners`, `scores`, `identity_match_flags`, `audit_log`, plus all ENUMs.
 
 - [ ] **Step 6: Run migration**
 
@@ -445,7 +481,7 @@ Expected: no errors. Verify with:
 ```bash
 psql -U postgres -d risk_rubric -c "\dt"
 ```
-Expected: lists all 6 tables.
+Expected: lists all 8 tables.
 
 - [ ] **Step 7: Commit**
 
@@ -1045,6 +1081,7 @@ class ScoreSubmissionRequest(BaseModel):
     scores: PillarScores
     evidence: list[EvidenceItem] = []
     scored_at: datetime
+    coi_disclosed: bool = False
 
     @model_validator(mode="after")
     def scored_at_not_future(self) -> "ScoreSubmissionRequest":
@@ -1095,6 +1132,7 @@ class ServiceListItem(BaseModel):
     grade: str | None
     confidence: int
     is_stale: bool
+    is_synthetic: bool
     scored_at: datetime | None
 
 
@@ -1234,7 +1272,7 @@ def test_submission_creates_service_and_score(client, db):
     assert score.security_score == 800.0
 
 
-def test_submission_upserts_score_on_resubmit(client, db):
+def test_submission_appends_score_on_resubmit(client, db):
     scanner, key = _make_scanner(db)
     # First submission
     client.post("/api/v1/scores", json=_valid_payload(),
@@ -1247,9 +1285,9 @@ def test_submission_upserts_score_on_resubmit(client, db):
     client.post("/api/v1/scores", json=payload,
                 headers={"Authorization": f"Bearer {key}"})
 
-    scores = db.query(Score).all()
-    assert len(scores) == 1  # upserted, not duplicated
-    assert scores[0].security_score == 900.0
+    scores = db.query(Score).order_by(Score.created_at).all()
+    assert len(scores) == 2  # append-only: both rows preserved
+    assert scores[-1].security_score == 900.0  # latest has the new value
 
 
 def test_submission_medium_confidence_flags_match(client, db):
@@ -1358,28 +1396,29 @@ def _derive_service_name(service_type: str, identity: dict) -> str:
     return "Unknown Service"
 
 
-def _upsert_score(db: Session, service_id: str, scanner_id: str, scores, scored_at: datetime) -> None:
-    existing = db.query(Score).filter(
-        Score.service_id == service_id,
-        Score.scanner_id == scanner_id,
-    ).first()
-
-    pillar_data = {
-        "transparency_score": scores.transparency,
-        "reliability_score": scores.reliability,
-        "security_score": scores.security,
-        "privacy_score": scores.privacy,
-        "safety_societal_score": scores.safety_societal,
-        "excessive_agency_score": scores.excessive_agency,
-        "composite_score": scores.composite,
-        "scored_at": scored_at,
-    }
-
-    if existing:
-        for k, v in pillar_data.items():
-            setattr(existing, k, v)
-    else:
-        db.add(Score(service_id=service_id, scanner_id=scanner_id, **pillar_data))
+def _insert_score(
+    db: Session,
+    service_id: str,
+    scanner_id: str,
+    scores,
+    scored_at: datetime,
+    coi_disclosed: bool,
+) -> None:
+    """Append a new score row. Scores are immutable once written; public endpoints
+    select the latest row per (service_id, scanner_id) at query time."""
+    db.add(Score(
+        service_id=service_id,
+        scanner_id=scanner_id,
+        transparency_score=scores.transparency,
+        reliability_score=scores.reliability,
+        security_score=scores.security,
+        privacy_score=scores.privacy,
+        safety_societal_score=scores.safety_societal,
+        excessive_agency_score=scores.excessive_agency,
+        composite_score=scores.composite,
+        coi_disclosed=coi_disclosed,
+        scored_at=scored_at,
+    ))
 
 
 @router.post("/scores", response_model=ScoreSubmissionResponse)
@@ -1409,7 +1448,7 @@ def submit_scores(
 
     svc, tier, flagged = _get_or_create_service(db, payload.service, match_result)
 
-    _upsert_score(db, svc.id, scanner.id, payload.scores, payload.scored_at)
+    _insert_score(db, svc.id, scanner.id, payload.scores, payload.scored_at, payload.coi_disclosed)
 
     if flagged:
         db.add(IdentityMatchFlag(
@@ -1483,7 +1522,7 @@ Expected: all 8 tests pass.
 
 ```bash
 git add app/api/v1/scores.py app/api/v1/router.py tests/test_api_submission.py
-git commit -m "feat: scanner submission endpoint with identity matching and upsert"
+git commit -m "feat: scanner submission endpoint with identity matching and append-only scoring"
 ```
 
 ---
@@ -1626,6 +1665,31 @@ def _is_stale(scored_at: datetime | None) -> bool:
     return scored_at < datetime.utcnow() - timedelta(days=STALE_DAYS)
 
 
+def _get_latest_scores(db: Session, service_id: str) -> list[Score]:
+    """Return the most recent score row per scanner for a service.
+    Scores are append-only; this subquery selects the latest created_at per
+    (service_id, scanner_id) so historical rows are preserved but not used."""
+    latest_subq = (
+        db.query(
+            Score.scanner_id,
+            func.max(Score.created_at).label("max_created_at"),
+        )
+        .filter(Score.service_id == service_id)
+        .group_by(Score.scanner_id)
+        .subquery()
+    )
+    return (
+        db.query(Score)
+        .join(
+            latest_subq,
+            (Score.scanner_id == latest_subq.c.scanner_id)
+            & (Score.created_at == latest_subq.c.max_created_at),
+        )
+        .filter(Score.service_id == service_id)
+        .all()
+    )
+
+
 def _build_pillar_breakdown(score: Score) -> PillarBreakdown:
     return PillarBreakdown(
         transparency=score.transparency_score,
@@ -1669,7 +1733,7 @@ def browse_services(
 
     result = []
     for svc in services:
-        scores = svc.scores.all()
+        scores = _get_latest_scores(db, svc.id)
         _, composite = _aggregate_service_scores(scores)
         latest = max((s.scored_at for s in scores), default=None)
         result.append(ServiceListItem(
@@ -1681,6 +1745,7 @@ def browse_services(
             grade=get_grade(composite) if composite is not None else None,
             confidence=len(scores),
             is_stale=_is_stale(latest),
+            is_synthetic=svc.is_synthetic,
             scored_at=latest,
         ))
     return result
@@ -1692,7 +1757,7 @@ def get_service(service_id: str, db: Session = Depends(get_db)):
     if not svc:
         raise HTTPException(status_code=404, detail="Service not found")
 
-    scores = svc.scores.all()
+    scores = _get_latest_scores(db, svc.id)
     pillars, composite = _aggregate_service_scores(scores)
     latest = max((s.scored_at for s in scores), default=None)
 
@@ -1717,6 +1782,7 @@ def get_service(service_id: str, db: Session = Depends(get_db)):
         grade=get_grade(composite) if composite is not None else None,
         confidence=len(scores),
         is_stale=_is_stale(latest),
+        is_synthetic=svc.is_synthetic,
         scored_at=latest,
         pillars=pillars,
         scanners=scanner_summaries,
@@ -1766,11 +1832,13 @@ from fastapi import APIRouter
 from app.api.v1.scores import router as scores_router
 from app.api.v1.services import router as services_router
 from app.api.v1.scanners import router as scanners_router
+from app.api.v1.methodology import router as methodology_router
 
 router = APIRouter()
 router.include_router(scores_router, tags=["scores"])
 router.include_router(services_router, tags=["services"])
 router.include_router(scanners_router, tags=["scanners"])
+router.include_router(methodology_router, tags=["methodology"])
 ```
 
 - [ ] **Step 6: Run all tests**
@@ -1790,6 +1858,112 @@ git commit -m "feat: public services browse, detail, and scanners list endpoints
 
 ---
 
+---
+
+## Task 10: Methodology Endpoint
+
+**Files:**
+- Create: `backend/app/api/v1/methodology.py`
+- Create: `backend/tests/test_api_methodology.py`
+- Modify: `backend/app/api/v1/router.py` (already updated in Task 9 Step 5)
+
+- [ ] **Step 1: Write failing test**
+
+Create `tests/test_api_methodology.py`:
+
+```python
+def test_methodology_returns_current(client):
+    resp = client.get("/api/v1/methodology/current")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["version"] == "2.0.0"
+    assert abs(data["pillar_weights"]["security"] - 0.20) < 0.001
+    assert abs(data["pillar_weights"]["transparency"] - 0.16) < 0.001
+    assert "grade_bands" in data
+    assert data["grade_bands"]["A"]["min"] == 900
+    assert data["divergence_threshold"] == 100
+    assert data["stale_days"] == 90
+```
+
+- [ ] **Step 2: Run to confirm failure**
+
+```bash
+pytest tests/test_api_methodology.py -v
+```
+
+Expected: 404 (route not registered yet).
+
+- [ ] **Step 3: Create `app/api/v1/methodology.py`**
+
+```python
+from __future__ import annotations
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+from app.db.session import get_db
+from app.db.models import MethodologyVersion
+
+router = APIRouter()
+
+_DEFAULTS = {
+    "version": "2.0.0",
+    "pillar_weights": {
+        "transparency": 0.16,
+        "reliability": 0.16,
+        "security": 0.20,
+        "privacy": 0.16,
+        "safety_societal": 0.16,
+        "excessive_agency": 0.16,
+    },
+    "grade_bands": {
+        "A": {"min": 900, "max": 1000},
+        "B": {"min": 800, "max": 899},
+        "C": {"min": 700, "max": 799},
+        "D": {"min": 600, "max": 699},
+        "F": {"min": 0,   "max": 599},
+    },
+    "divergence_threshold": 100,
+    "stale_days": 90,
+}
+
+
+@router.get("/methodology/current")
+def get_current_methodology(db: Session = Depends(get_db)):
+    """Return current methodology version and scoring parameters.
+    Falls back to hardcoded v2.0.0 defaults if no DB record exists."""
+    current = (
+        db.query(MethodologyVersion)
+        .filter(MethodologyVersion.is_current.is_(True))
+        .first()
+    )
+    if current:
+        return {
+            "version": current.version,
+            "pillar_weights": current.pillar_weights,
+            "released_at": current.released_at.isoformat(),
+            "grade_bands": _DEFAULTS["grade_bands"],
+            "divergence_threshold": _DEFAULTS["divergence_threshold"],
+            "stale_days": _DEFAULTS["stale_days"],
+        }
+    return _DEFAULTS
+```
+
+- [ ] **Step 4: Run test to confirm pass**
+
+```bash
+pytest tests/test_api_methodology.py -v
+```
+
+Expected: 1 test passes (uses fallback defaults; no DB record seeded).
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add app/api/v1/methodology.py tests/test_api_methodology.py
+git commit -m "feat: GET /methodology/current endpoint with hardcoded v2.0.0 defaults"
+```
+
+---
+
 ## Self-Review
 
 **Spec coverage check:**
@@ -1804,13 +1978,18 @@ git commit -m "feat: public services browse, detail, and scanners list endpoints
 | Confidence index (C) | Task 9 (browse endpoint, `confidence=len(scores)`) |
 | Argon2 key hashing | Task 6 (`keys.py`) |
 | Three-tier identity matching | Task 5 (`identity.py`) |
-| UNIQUE(service_id, scanner_id) upsert | Task 8 (submission endpoint, `_upsert_score`) |
+| Append-only scores, latest-per-scanner view | Task 8 (`_insert_score`), Task 9 (`_get_latest_scores`) |
 | Scores publish immediately | Task 8 (commit before returning) |
 | IdentityMatchFlag created async | Task 8 (flagged after score commit) |
 | Stale rule (90 days) | Task 9 (`_is_stale`, `is_stale` on responses) |
 | Arithmetic mean aggregation | Task 9 (`aggregate_pillar_scores`) |
 | Revoked scanner blocked | Task 8 (`_authenticate_scanner` checks status) |
 | Class table inheritance schema | Task 2 (`models.py`) |
+| Methodology versioning | Task 2 (`MethodologyVersion` model), Task 10 (endpoint) |
+| COI disclosure | Task 7 (`coi_disclosed` in schema), Task 8 (stored on Score) |
+| Scanner conformance status | Task 2 (`conformance_status` on Scanner) |
+| Audit log table | Task 2 (`AuditLog` model) |
+| is_synthetic flag | Task 2 (Service model), Task 9 (responses) |
 | Real DB tests (no mocks) | Task 5 `conftest.py` (transaction rollback per test) |
 
 **Not covered in this plan (follow-on plans):**
