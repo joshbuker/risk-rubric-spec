@@ -31,9 +31,9 @@ export function CompareShell() {
 
   if (items.length === 0) {
     return (
-      <div className="text-center py-24">
-        <p className="text-slate-400 text-sm mb-4">No services in your comparison yet.</p>
-        <Link href="/browse" className="text-blue-600 font-semibold hover:underline text-sm">
+      <div className="bg-[#0d1117] min-h-screen text-center py-24">
+        <p className="text-[#8b949e] text-sm mb-4">No services in your comparison yet.</p>
+        <Link href="/browse" className="text-[#79c0ff] font-semibold hover:underline text-sm">
           ← Browse services to add
         </Link>
       </div>
@@ -41,37 +41,39 @@ export function CompareShell() {
   }
 
   return (
-    <div className="max-w-screen-xl mx-auto px-4 py-6">
-      {items.map((i) => (
-        <ServiceLoader key={i.id} id={i.id} onLoaded={handleLoaded} />
-      ))}
+    <div className="bg-[#0d1117] min-h-screen">
+      <div className="max-w-screen-xl mx-auto px-4 py-6">
+        {items.map((i) => (
+          <ServiceLoader key={i.id} id={i.id} onLoaded={handleLoaded} />
+        ))}
 
-      <div className="flex items-start justify-between mb-5">
-        <div>
-          <h1 className="text-xl font-bold text-slate-800">Compare Services</h1>
-          <div className="flex items-center gap-2 mt-1">
-            {lockedType && <TypeChip type={lockedType} />}
-            <span className="text-sm text-slate-500">
-              {items.length} of 4 max
-            </span>
+        <div className="flex items-start justify-between mb-5">
+          <div>
+            <h1 className="text-xl font-bold text-[#c9d1d9]">Compare Services</h1>
+            <div className="flex items-center gap-2 mt-1">
+              {lockedType && <TypeChip type={lockedType} />}
+              <span className="text-sm text-[#8b949e]">
+                {items.length} of 4 max
+              </span>
+            </div>
           </div>
+          <button
+            onClick={clear}
+            className="text-sm text-[#8b949e] hover:text-[#f85149] border border-[#30363d] hover:border-[#f85149] px-3 py-1.5 rounded-lg"
+          >
+            Clear all
+          </button>
         </div>
-        <button
-          onClick={clear}
-          className="text-sm text-slate-500 hover:text-red-500 border border-slate-200 hover:border-red-200 px-3 py-1.5 rounded-lg"
-        >
-          Clear all
-        </button>
-      </div>
 
-      {services.length > 0 && (
-        <CompareGrid services={services} onRemove={remove} />
-      )}
+        {services.length > 0 && (
+          <CompareGrid services={services} onRemove={remove} />
+        )}
 
-      <div className="flex items-center justify-between mt-5">
-        <Link href="/browse" className="text-sm text-blue-600 font-medium hover:underline">
-          ← Back to Browse
-        </Link>
+        <div className="flex items-center justify-between mt-5">
+          <Link href="/browse" className="text-sm text-[#79c0ff] font-medium hover:underline">
+            ← Back to Browse
+          </Link>
+        </div>
       </div>
     </div>
   );

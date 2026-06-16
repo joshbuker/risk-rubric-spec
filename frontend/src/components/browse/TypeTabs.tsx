@@ -31,7 +31,7 @@ export function TypeTabs({ active, counts, onChange }: Props) {
             <span className={`ml-1.5 text-[11px] px-[7px] py-[1px] rounded-full ${
               isActive
                 ? "bg-[#79c0ff22] text-[#79c0ff]"
-                : "bg-[#30363d] text-[#8b949e]"
+                : "bg-[#30363d] text-[#c9d1d9]"
             }`}>
               {counts[type] ?? 0}
             </span>

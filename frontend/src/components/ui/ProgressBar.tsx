@@ -16,7 +16,7 @@ interface Props {
 export function ProgressBar({ score, grade }: Props) {
   const pct = Math.min(100, Math.max(0, score / 10));
   return (
-    <div className="h-2 w-full rounded-full bg-slate-100 overflow-hidden">
+    <div className="h-2 w-full rounded-full bg-[#21262d] overflow-hidden">
       <div
         className={`h-full rounded-full ${BAR_CLASSES[grade]}`}
         style={{ width: `${pct}%` }}

@@ -42,7 +42,7 @@ export function TopNav() {
                 <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#79c0ff]" />
               )}
               {label === "Compare" && count > 0 && (
-                <span className="ml-1.5 bg-blue-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
+                <span className="ml-1.5 bg-[#1f6feb] text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
                   {count}
                 </span>
               )}
@@ -55,7 +55,7 @@ export function TopNav() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="🔍 Search models, MCP servers…"
-          className="bg-[#0d1117] border border-[#30363d] rounded-md px-3 py-1.5 text-[#8b949e] text-[12px] w-56 focus:outline-none focus:border-[#79c0ff] placeholder:text-[#8b949e]"
+          className="bg-[#0d1117] border border-[#30363d] rounded-md px-3 py-1.5 text-[#c9d1d9] placeholder:text-[#8b949e] text-[12px] w-56 focus:outline-none focus:border-[#79c0ff]"
         />
       </form>
     </nav>

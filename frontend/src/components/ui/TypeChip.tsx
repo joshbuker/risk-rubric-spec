@@ -3,15 +3,15 @@ import type { ServiceType } from "@/lib/types";
 const TYPE_CONFIG: Record<ServiceType, { label: string; className: string }> = {
   ai_model: {
     label: "🧠 AI Model",
-    className: "bg-blue-50 text-blue-700 border border-blue-200",
+    className: "bg-[#1f3c6b] text-[#79c0ff] border border-[#1f6feb]",
   },
   mcp_server: {
     label: "🔌 MCP Server",
-    className: "bg-violet-50 text-violet-700 border border-violet-200",
+    className: "bg-[#2d1f5e] text-[#d2a8ff] border border-[#8957e5]",
   },
   agent: {
     label: "🤖 AI Agent",
-    className: "bg-slate-50 text-slate-700 border border-slate-200",
+    className: "bg-[#21262d] text-[#c9d1d9] border border-[#30363d]",
   },
 };
 

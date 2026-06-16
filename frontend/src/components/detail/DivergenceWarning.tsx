@@ -11,7 +11,7 @@ export function DivergenceWarning({ scannerPillars, aggregatePillars }: Props) {
   if (diverging.length === 0) return null;
 
   return (
-    <div className="bg-amber-50 border border-amber-300 rounded-lg px-3 py-2 mt-3 text-xs text-amber-800">
+    <div className="bg-[#2d2a1a] border border-[#ffa657] rounded-lg px-3 py-2 mt-3 text-xs text-[#ffa657]">
       ↕ This scanner&apos;s score differs from the aggregate by 100+ points on:{" "}
       <strong>{diverging.map((k) => PILLAR_LABELS[k]).join(", ")}</strong>
     </div>
