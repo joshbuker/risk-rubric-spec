@@ -1,8 +1,0 @@
-pyproject.toml
-risk_rubric_mcp.egg-info/PKG-INFO
-risk_rubric_mcp.egg-info/SOURCES.txt
-risk_rubric_mcp.egg-info/dependency_links.txt
-risk_rubric_mcp.egg-info/entry_points.txt
-risk_rubric_mcp.egg-info/requires.txt
-risk_rubric_mcp.egg-info/top_level.txt
-tests/test_mcp_tools.py

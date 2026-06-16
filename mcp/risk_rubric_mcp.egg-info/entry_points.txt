@@ -1,2 +1,0 @@
-[console_scripts]
-risk-rubric-mcp = server:main
