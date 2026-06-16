@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
 from slugify import slugify
@@ -49,7 +49,7 @@ def accept_flag(
         raise HTTPException(status_code=422, detail="Flag is not pending")
 
     flag.status = "accepted"
-    flag.resolved_at = datetime.utcnow()
+    flag.resolved_at = datetime.now(timezone.utc)
     db.commit()
     return {"status": "accepted", "flag_id": flag_id}
 
@@ -136,7 +136,7 @@ def reject_flag(
 
     # Resolve the flag
     flag.status = "rejected"
-    flag.resolved_at = datetime.utcnow()
+    flag.resolved_at = datetime.now(timezone.utc)
     db.commit()
 
     return {"status": "rejected", "flag_id": flag_id, "new_service_id": new_svc.id}
