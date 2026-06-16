@@ -131,6 +131,7 @@ class IdentityMatchFlag(Base):
 
     id = Column(String, primary_key=True, default=lambda: _sid("flg"))
     service_id = Column(String, ForeignKey("services.id"), nullable=False)
+    scanner_id = Column(String, ForeignKey("scanners.id"), nullable=True)
     incoming_identity = Column(JSON, nullable=False)
     existing_identity = Column(JSON, nullable=True)
     match_tier = Column(String, nullable=False)
@@ -143,6 +144,7 @@ class IdentityMatchFlag(Base):
     resolved_at = Column(DateTime, nullable=True)
 
     service = relationship("Service", back_populates="flags")
+    scanner = relationship("Scanner")
 
 
 class AuditLog(Base):

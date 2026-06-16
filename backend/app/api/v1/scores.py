@@ -110,6 +110,7 @@ def submit_scores(
     if flagged:
         db.add(IdentityMatchFlag(
             service_id=svc.id,
+            scanner_id=scanner.id,
             incoming_identity=identity,
             existing_identity=existing_identity,
             match_tier=tier,
