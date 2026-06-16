@@ -40,7 +40,7 @@ export function useCompare() {
     remove,
     clear,
     lockedType: items[0]?.service_type ?? null,
-    canAdd: (type: ServiceType) => canAdd(type),
+    canAdd: useCallback((type: ServiceType) => canAdd(type), []),
     count: items.length,
   };
 }
