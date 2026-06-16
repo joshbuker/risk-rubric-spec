@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 import pytest
 
@@ -57,7 +57,7 @@ def _seed_flag(db):
         safety_societal_score=pillar_scores["safety_societal"],
         excessive_agency_score=pillar_scores["excessive_agency"],
         composite_score=compute_composite(pillar_scores),
-        scored_at=datetime.utcnow(),
+        scored_at=datetime.now(timezone.utc),
     )
     db.add(score)
     db.flush()
