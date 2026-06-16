@@ -1,2 +1,5 @@
 .superpowers/
 .claude/settings.local.json
+backend/venv/
+backend/.venv/
+backend/.env
