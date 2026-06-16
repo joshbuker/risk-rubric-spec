@@ -32,7 +32,7 @@
     "5432": { "label": "PostgreSQL" }
   },
   "features": {
-    "ghcr.io/devcontainers/features/node:1": { "version": "20", "npmVersion": "latest" }
+    "ghcr.io/devcontainers/features/node:1": { "version": "20", "npmVersion": "11" }
   },
   "remoteUser": "vscode"
 }
