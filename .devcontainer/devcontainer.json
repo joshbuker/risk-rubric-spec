@@ -3,7 +3,7 @@
   "dockerComposeFile": "docker-compose.yml",
   "service": "app",
   "workspaceFolder": "/workspaces/risk-rubric-spec",
-  "postCreateCommand": "cp -n frontend/.env.local.example frontend/.env.local && cd frontend && npm install && cd /workspaces/risk-rubric-spec/backend && python3 -m venv venv && venv/bin/pip install --upgrade pip && venv/bin/pip install -e '.[dev]'",
+  "postCreateCommand": "npm install -g npm@11 && cp -n frontend/.env.local.example frontend/.env.local && cd frontend && npm install && cd /workspaces/risk-rubric-spec/backend && python3 -m venv venv && venv/bin/pip install --upgrade pip && venv/bin/pip install -e '.[dev]'",
   "postStartCommand": "bash /workspaces/risk-rubric-spec/.devcontainer/start-services.sh",
   "customizations": {
     "vscode": {
@@ -32,7 +32,7 @@
     "5432": { "label": "PostgreSQL" }
   },
   "features": {
-    "ghcr.io/devcontainers/features/node:1": { "version": "20", "npmVersion": "11" }
+    "ghcr.io/devcontainers/features/node:1": { "version": "20" }
   },
   "remoteUser": "vscode"
 }
