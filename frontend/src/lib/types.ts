@@ -30,6 +30,13 @@ export interface ServiceListItem {
   confidence: number;
   is_stale: boolean;
   scored_at: string | null;
+  // Provider detail (for subtitle + sidebar filters); optional for backward-compat
+  engine_provider?: string | null;
+  platform_provider?: string | null;
+  provider_org?: string | null;
+  target_service?: string | null;
+  // Aggregate pillar scores (for per-column grade badges)
+  pillar_scores?: PillarBreakdown | null;
 }
 
 export interface ServiceDetail extends ServiceListItem {

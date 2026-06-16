@@ -32,6 +32,13 @@ class ServiceListItem(BaseModel):
     is_stale: bool
     is_synthetic: bool
     scored_at: datetime | None
+    # Per-type detail fields (for subtitle + sidebar filters)
+    engine_provider: str | None = None
+    platform_provider: str | None = None
+    provider_org: str | None = None
+    target_service: str | None = None
+    # Aggregate pillar scores across all scanners (for per-column grade badges)
+    pillar_scores: dict | None = None
 
 
 class ServiceDetail(ServiceListItem):
