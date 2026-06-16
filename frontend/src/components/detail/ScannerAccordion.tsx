@@ -11,6 +11,15 @@ interface Props {
   aggregatePillars: PillarBreakdown;
 }
 
+function isSafeUrl(url: string): boolean {
+  try {
+    const u = new URL(url.trimStart());
+    return u.protocol === "https:" || u.protocol === "http:";
+  } catch {
+    return false;
+  }
+}
+
 export function ScannerAccordion({ scanner, aggregatePillars }: Props) {
   const [open, setOpen] = useState(false);
   const grade = getGrade(scanner.composite_score);
@@ -53,12 +62,18 @@ export function ScannerAccordion({ scanner, aggregatePillars }: Props) {
           {scanner.evidence.length > 0 && (
             <div className="mt-3 pt-3 border-t border-slate-100">
               <div className="text-xs font-bold uppercase text-slate-400 mb-1.5">Evidence</div>
-              {scanner.evidence.map((e, i) => (
-                <a key={i} href={e.url} target="_blank" rel="noopener noreferrer"
-                   className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline mr-4">
-                  ↗ {e.label}
-                </a>
-              ))}
+              {scanner.evidence.map((e, i) =>
+                isSafeUrl(e.url) ? (
+                  <a key={i} href={e.url} target="_blank" rel="noopener noreferrer"
+                     className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline mr-4">
+                    ↗ {e.label}
+                  </a>
+                ) : (
+                  <span key={i} className="inline-flex items-center gap-1 text-xs text-slate-400 mr-4">
+                    ↗ {e.label}
+                  </span>
+                )
+              )}
             </div>
           )}
 
