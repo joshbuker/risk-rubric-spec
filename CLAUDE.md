@@ -14,6 +14,12 @@ Environment variables available inside the container:
 
 **Fallback: NixOS shell.nix** — the host machine runs NixOS. If working outside the devcontainer, tools must be declared in `shell.nix` to be on PATH. If a tool is missing, add it to `shell.nix` and ask the user to restart Claude Code.
 
+**Host-side Python venv** — `backend/.venv/` (gitignored) is a host-native venv for running tests from the NixOS shell without entering the devcontainer. PostgreSQL is exposed on `localhost:5432` from docker-compose. Create/update it with:
+```bash
+python3 -m venv backend/.venv && backend/.venv/bin/pip install -e "backend/.[dev]" -q
+backend/.venv/bin/pytest backend/tests/ -v
+```
+
 ## Commands
 
 ### Backend (FastAPI — `backend/`)
