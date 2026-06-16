@@ -31,5 +31,9 @@
     "8000": { "label": "Backend (FastAPI)" },
     "5432": { "label": "PostgreSQL" }
   },
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": { "version": "20" },
+    "ghcr.io/robbert229/devcontainer-features/postgresql-client:1": { "version": "16" }
+  },
   "remoteUser": "vscode"
 }
