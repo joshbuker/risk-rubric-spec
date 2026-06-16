@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Primary dev environment: VS Code devcontainer** (`.devcontainer/`).
 
-Inside the devcontainer, `python`, `node`, `psql`, `pip`, `npm` etc. are all on PATH — no special setup needed. PostgreSQL 16 runs as a sidecar container reachable at host `db`, port `5432`. Both `risk_rubric` and `risk_rubric_test` databases are created automatically on first container start.
+Inside the devcontainer, `python`, `node`, `pip`, `npm` etc. are all on PATH — no special setup needed. PostgreSQL 16 runs as a sidecar container reachable at host `db`, port `5432`. Both `risk_rubric` and `risk_rubric_test` databases are created automatically on first container start.
 
 Environment variables available inside the container:
 - `DATABASE_URL=postgresql://postgres:postgres@db:5432/risk_rubric`
