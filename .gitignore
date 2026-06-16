@@ -6,3 +6,4 @@ backend/*.egg-info/
 backend/.env
 backend/**/__pycache__/
 backend/**/*.pyc
+mcp/.venv/
