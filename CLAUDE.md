@@ -50,36 +50,84 @@ cd frontend && npm install
 # Run dev server (port 3000)
 cd frontend && npm run dev
 
+# Production build (also validates types)
+cd frontend && npm run build
+
 # Run tests
 cd frontend && npm test
 
-# Type check
+# Type check only
 cd frontend && npx tsc --noEmit
 ```
 
 ## Project Status
 
-This repo contains a full technical spec and implementation plans; the `backend/` and `frontend/` source directories do not exist yet. Implementation plans in `docs/superpowers/plans/` are the authoritative blueprints:
+Implementation plans in `docs/superpowers/plans/` are the authoritative blueprints:
 
-- **Plan 1** (`2026-06-10-risk-rubric-v2-backend.md`) — FastAPI backend (start here)
-- **Plan 2** (`2026-06-10-risk-rubric-v2-frontend.md`) — Next.js public frontend (depends on Plan 1)
-- **Plan 3** (`2026-06-10-risk-rubric-v2-admin-mcp.md`) — Admin interface + read-only MCP server (depends on Plan 1)
+- **Plan 1** (`2026-06-10-risk-rubric-v2-backend.md`) — FastAPI backend ✅ complete
+- **Plan 2** (`2026-06-10-risk-rubric-v2-frontend.md`) — Next.js public frontend ✅ complete
+- **Plan 3** (`2026-06-10-risk-rubric-v2-admin-mcp.md`) — Admin interface + read-only MCP server (not yet started)
 
 Use `superpowers:subagent-driven-development` to execute plans task by task.
 
 ## Architecture
 
-**Tech stack:** Python 3.12 + FastAPI backend, Next.js 14 (App Router) + TypeScript + Tailwind frontend, PostgreSQL 16 database, Redis cache, read-only MCP server (stdio + HTTP).
+**Tech stack:** Python 3.12 + FastAPI backend, Next.js 16.2.9 + React 19 + Tailwind v4 frontend, PostgreSQL 16 database, Redis cache (not yet integrated), read-only MCP server (not yet built).
+
+### ⚠️ Next.js version warning
+
+This project uses **Next.js 16** and **React 19**, which have breaking changes relative to most training data. Before writing any Next.js code, read the relevant guide in `frontend/node_modules/next/dist/docs/`. Heed deprecation notices.
+
+### Frontend structure (`frontend/src/`)
+
+Layers and their responsibilities:
+
+```
+app/                    ← Next.js App Router pages (thin — just mount a Shell component)
+  browse/page.tsx       ← mounts BrowseShell
+  compare/page.tsx      ← mounts CompareShell
+  services/[id]/page.tsx ← "use client"; fetches via useService hook, mounts detail components
+
+components/
+  browse/               ← BrowseShell (tab/filter state), BrowseTable, ServiceRow, SidebarFilters, TypeTabs
+  compare/              ← CompareShell (loads services via useService), CompareGrid, PillarCompareRow,
+                           ServiceColumnHeader, AddServiceColumn
+  detail/               ← ServiceHero, PillarBreakdown, ScannerAccordion, DivergenceWarning
+  nav/                  ← TopNav
+  ui/                   ← Stateless primitives: GradeBadge, ProgressBar, ConfidenceChip, StaleBanner, TypeChip
+
+hooks/
+  useServices.ts        ← SWR wrapper around fetchServices(); keyed by [serviceType]
+  useService.ts         ← SWR wrapper around fetchService(id)
+  useCompare.ts         ← localStorage compare-set state (wraps compare-store.ts)
+
+lib/
+  api.ts                ← apiFetch helper; NEXT_PUBLIC_API_URL → http://localhost:8000/api/v1
+  types.ts              ← ServiceListItem, ServiceDetail, ScannerScore, PillarBreakdown, Grade, ServiceType
+  scoring.ts            ← PILLAR_WEIGHTS, PILLAR_LABELS, getGrade(), isStale(), hasDivergence()
+  compare-store.ts      ← localStorage CRUD for compare set (key: "rr_compare_v1", max 4, type-locked)
+```
+
+Key patterns:
+- Pages are server components by default; interactive shells are `"use client"` components
+- Data fetching uses SWR (`useSWR`) — no direct fetch in components
+- Compare set persists to `localStorage` and is type-locked to the first added service's `service_type`
+- Frontend tests live in `frontend/tests/` (not colocated), use Jest + JSDOM + Testing Library
 
 ### Backend structure (`backend/app/`)
 
-- `db/models.py` — all SQLAlchemy ORM models
+- `main.py` — FastAPI app, mounts `v1_router` at `/api/v1`
+- `config.py` — Pydantic settings (reads `DATABASE_URL`)
+- `db/models.py` — all SQLAlchemy ORM models; IDs are `{prefix}_{hex8}` strings (e.g. `svc_abc12345`)
 - `db/session.py` — engine, `SessionLocal`, `get_db` FastAPI dependency
-- `api/v1/` — FastAPI routers: `scores.py` (submission), `services.py` (browse/detail), `scanners.py`, `methodology.py`
-- `schemas/` — Pydantic request/response models
-- `services/scoring.py` — `PILLAR_WEIGHTS`, `compute_composite`, `get_grade`, `aggregate_pillar_scores`
+- `api/v1/` — routers: `scores.py` (submission), `services.py` (browse/detail), `scanners.py`, `methodology.py`
+- `schemas/scores.py` — `ScoreSubmissionRequest` / `ScoreSubmissionResponse`
+- `schemas/services.py` — `ServiceListItem`, `ServiceDetail`, `PillarBreakdown`, `ScannerScoreSummary`
+- `services/scoring.py` — `PILLAR_WEIGHTS`, `compute_composite`, `validate_composite_tolerance`, `get_grade`, `aggregate_pillar_scores`
 - `services/identity.py` — `match_service()` three-tier identity matching
-- `services/keys.py` — argon2 API key generation and verification
+- `services/keys.py` — argon2 API key generation (`generate_key`) and verification (`verify_key`)
+
+Authentication: scanner API keys are verified in `scores.py:_authenticate_scanner` — iterates active scanners and calls `verify_key`. No JWT; key prefix `sk_<org>_XXXX…` is stored readable, full key is argon2-hashed.
 
 ### Database schema (class-table inheritance)
 
@@ -122,12 +170,6 @@ When a scanner submits scores, the platform matches the submitted identity tuple
 1. **High confidence** — `external_id` provided matches, or identity tuple is exact → auto-link, no review
 2. **Medium confidence** — exactly one field mismatch → auto-link + flag for async CSA review
 3. **No match** — 2+ fields differ or empty DB → auto-create new service + flag for CSA awareness
-
-### Frontend pages
-
-- `/browse` — tabbed table (AI Models / MCP Servers) with sidebar filters, stale row styling, "+ Add to Compare"
-- `/services/[id]` — hero with composite grade, pillar breakdown, collapsible per-scanner blocks with divergence indicators
-- `/compare` — side-by-side grid for 2–4 services; locked to one service type; compare set persists in localStorage
 
 ## Working Style
 

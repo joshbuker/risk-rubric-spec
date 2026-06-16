@@ -2,6 +2,7 @@
 .claude/settings.local.json
 backend/venv/
 backend/.venv/
+backend/*.egg-info/
 backend/.env
 backend/**/__pycache__/
 backend/**/*.pyc

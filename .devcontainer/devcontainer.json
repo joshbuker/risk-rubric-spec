@@ -3,6 +3,8 @@
   "dockerComposeFile": "docker-compose.yml",
   "service": "app",
   "workspaceFolder": "/workspaces/risk-rubric-spec",
+  "postCreateCommand": "cp -n frontend/.env.local.example frontend/.env.local && cd frontend && npm install && cd /workspaces/risk-rubric-spec/backend && python3 -m venv venv && venv/bin/pip install -e '.[dev]'",
+  "postStartCommand": "bash /workspaces/risk-rubric-spec/.devcontainer/start-services.sh",
   "customizations": {
     "vscode": {
       "extensions": [
@@ -11,6 +13,7 @@
         "charliermarsh.ruff",
         "esbenp.prettier-vscode",
         "bradlc.vscode-tailwindcss",
+        "dbaeumer.vscode-eslint",
         "ms-azuretools.vscode-docker"
       ],
       "settings": {
@@ -23,5 +26,10 @@
     }
   },
   "forwardPorts": [8000, 3000, 5432],
+  "portsAttributes": {
+    "3000": { "label": "Frontend (Next.js)" },
+    "8000": { "label": "Backend (FastAPI)" },
+    "5432": { "label": "PostgreSQL" }
+  },
   "remoteUser": "vscode"
 }
