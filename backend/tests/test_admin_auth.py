@@ -1,13 +1,5 @@
 import pytest
-from fastapi.testclient import TestClient
-from app.main import app
 from app.config import settings
-
-
-@pytest.fixture
-def client():
-    with TestClient(app) as c:
-        yield c
 
 
 def test_login_with_correct_secret(client):
