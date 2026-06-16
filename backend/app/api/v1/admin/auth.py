@@ -22,7 +22,7 @@ class TokenResponse(BaseModel):
 
 def _make_token() -> str:
     exp = datetime.now(timezone.utc) + timedelta(hours=settings.admin_token_expire_hours)
-    return jwt.encode({"admin": True, "exp": exp}, settings.admin_secret, algorithm="HS256")
+    return jwt.encode({"admin": True, "exp": exp}, settings.admin_jwt_signing_key, algorithm="HS256")
 
 
 def get_admin_user(authorization: str | None = Header(None)) -> dict:
@@ -30,7 +30,7 @@ def get_admin_user(authorization: str | None = Header(None)) -> dict:
         raise HTTPException(status_code=401, detail="Admin authentication required", headers=_WWW_AUTH)
     token = authorization.removeprefix("Bearer ").strip()
     try:
-        payload = jwt.decode(token, settings.admin_secret, algorithms=["HS256"])
+        payload = jwt.decode(token, settings.admin_jwt_signing_key, algorithms=["HS256"])
         if not payload.get("admin"):
             raise HTTPException(status_code=403)
         return payload
