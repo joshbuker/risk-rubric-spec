@@ -1,5 +1,5 @@
 from __future__ import annotations
-from datetime import datetime
+from datetime import datetime, timezone
 from pydantic import BaseModel, field_validator, model_validator
 from typing import Literal
 
@@ -56,7 +56,7 @@ class ScoreSubmissionRequest(BaseModel):
 
     @model_validator(mode="after")
     def scored_at_not_future(self) -> "ScoreSubmissionRequest":
-        if self.scored_at.replace(tzinfo=None) > datetime.utcnow():
+        if self.scored_at.replace(tzinfo=None) > datetime.now(timezone.utc).replace(tzinfo=None):
             raise ValueError("scored_at must not be in the future")
         return self
 
