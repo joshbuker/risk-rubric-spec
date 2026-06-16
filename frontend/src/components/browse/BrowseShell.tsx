@@ -15,7 +15,8 @@ export function BrowseShell() {
   const [selectedGrades, setSelectedGrades] = useState<Grade[]>(["A", "B", "C", "D", "F"]);
   const [minConfidence, setMinConfidence] = useState(1);
 
-  const { data: services = [], isLoading } = useServices(activeTab);
+  // Fetch all types so tab counts are always accurate regardless of active tab
+  const { data: services = [], isLoading } = useServices();
   const { add, canAdd, count } = useCompare();
 
   const counts = useMemo(() => ({
@@ -26,11 +27,12 @@ export function BrowseShell() {
 
   const filtered = useMemo(() =>
     services.filter((s) => {
+      if (s.service_type !== activeTab) return false;
       if (s.composite_score == null) return false;
       const grade = s.grade ?? getGrade(s.composite_score);
       return selectedGrades.includes(grade) && s.confidence >= minConfidence;
     }),
-    [services, selectedGrades, minConfidence]
+    [services, activeTab, selectedGrades, minConfidence]
   );
 
   function handleAddToCompare(s: ServiceListItem) {

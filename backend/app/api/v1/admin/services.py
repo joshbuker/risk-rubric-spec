@@ -56,6 +56,22 @@ def list_services(
             grade = None
             confidence = 0
 
+        scanner_scores = []
+        if all_scores:
+            for score in latest_scores:
+                scanner_scores.append({
+                    "scanner_id": score.scanner_id,
+                    "scanner_name": score.scanner.name if score.scanner else "Unknown",
+                    "composite_score": score.composite_score,
+                    "transparency_score": score.transparency_score,
+                    "reliability_score": score.reliability_score,
+                    "security_score": score.security_score,
+                    "privacy_score": score.privacy_score,
+                    "safety_societal_score": score.safety_societal_score,
+                    "excessive_agency_score": score.excessive_agency_score,
+                    "scored_at": score.scored_at.isoformat() if score.scored_at else None,
+                })
+
         result.append({
             "id": svc.id,
             "name": svc.name,
@@ -64,6 +80,7 @@ def list_services(
             "grade": grade,
             "confidence": confidence,
             "is_stale": False,
+            "scanner_scores": scanner_scores,
         })
     return result
 
