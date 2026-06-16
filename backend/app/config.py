@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     admin_secret: str = "change-me-in-production"
     admin_token_expire_hours: int = 8
     admin_jwt_signing_key: str = Field(default_factory=lambda: secrets.token_urlsafe(32))
+    cors_origins: list[str] = ["http://localhost:3000"]
 
     model_config = {"env_file": ".env"}
 
