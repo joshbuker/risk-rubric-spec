@@ -11,7 +11,8 @@ import { StaleBanner } from "@/components/ui/StaleBanner";
 export default function ServiceDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { data: service, isLoading, error } = useService(id);
-  const { add, canAdd } = useCompare();
+  const { add, remove, canAdd, items } = useCompare();
+  const isInCompare = items.some((i) => i.id === id);
 
   if (isLoading) return <div className="bg-[#0d1117] min-h-screen text-center py-16 text-[#8b949e]">Loading…</div>;
   if (error || !service) return <div className="bg-[#0d1117] min-h-screen text-center py-16 text-[#f85149]">Service not found.</div>;
@@ -24,7 +25,7 @@ export default function ServiceDetailPage() {
       <div className="border-b border-[#30363d] px-6 py-2 text-[13px] text-[#8b949e]">
         <Link href="/browse" className="text-[#79c0ff] hover:underline">Browse</Link>
         {" "}›{" "}
-        <Link href={`/browse`} className="text-[#79c0ff] hover:underline">{typeLabel}</Link>
+        <Link href={`/browse?tab=${service.service_type}`} className="text-[#79c0ff] hover:underline">{typeLabel}</Link>
         {" "}›{" "}
         <span className="text-[#c9d1d9]">{service.name}</span>
       </div>
@@ -64,13 +65,22 @@ export default function ServiceDetailPage() {
             >
               ↩ Back to Browse
             </Link>
-            <button
-              onClick={() => add({ id: service.id, service_type: service.service_type, name: service.name })}
-              disabled={!canAdd(service.service_type)}
-              className="text-[13px] font-semibold px-4 py-2 rounded-lg bg-[#1f6feb] text-white hover:bg-[#388bfd] disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              ＋ Add to Compare
-            </button>
+            {isInCompare ? (
+              <button
+                onClick={() => remove(service.id)}
+                className="text-[13px] font-semibold px-4 py-2 rounded-lg bg-[#1a3a2a] border border-[#2ea04326] text-[#56d364] hover:bg-[#162c20] hover:border-[#56d364]"
+              >
+                ✓ In Compare
+              </button>
+            ) : (
+              <button
+                onClick={() => add({ id: service.id, service_type: service.service_type, name: service.name })}
+                disabled={!canAdd(service.service_type)}
+                className="text-[13px] font-semibold px-4 py-2 rounded-lg bg-[#1f6feb] text-white hover:bg-[#388bfd] disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                ＋ Add to Compare
+              </button>
+            )}
           </div>
         </div>
       </div>
