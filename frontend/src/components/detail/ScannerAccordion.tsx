@@ -34,7 +34,7 @@ export function ScannerAccordion({ scanner, aggregatePillars }: Props) {
         className="w-full flex items-center gap-3 px-4 py-3 bg-[#161b22] hover:bg-[#1c2128] text-left"
       >
         <span className="font-semibold text-[13px] text-[#79c0ff] flex-1">
-          🔍 RiskRubric scanner powered by {scanner.scanner_name}
+          {scanner.scanner_name}
         </span>
         <span className="text-[11px] text-[#8b949e] whitespace-nowrap">
           Scanned {scoredDate}

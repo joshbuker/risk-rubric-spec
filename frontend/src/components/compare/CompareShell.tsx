@@ -52,8 +52,9 @@ export function CompareShell() {
             <h1 className="text-xl font-bold text-[#c9d1d9]">Compare Services</h1>
             <div className="flex items-center gap-2 mt-1">
               {lockedType && <TypeChip type={lockedType} />}
-              <span className="text-sm text-[#8b949e]">
-                {items.length} of 4 max
+              <span className="text-[13px] text-[#8b949e]">
+                Comparing {items.length} {items.length === 1 ? "service" : "services"}
+                {items.length < 4 ? ` — ${4 - items.length} more can be added (max 4)` : " (max reached)"}
               </span>
             </div>
           </div>
@@ -69,8 +70,15 @@ export function CompareShell() {
           <CompareGrid services={services} onRemove={remove} />
         )}
 
-        <div className="flex items-center justify-between mt-5">
-          <Link href="/browse" className="text-sm text-[#79c0ff] font-medium hover:underline">
+        <div className="flex items-center gap-2 bg-[#161b22] border border-[#30363d] rounded-lg px-3.5 py-2.5 mt-4 text-[11px] text-[#8b949e]">
+          <span>📝</span>
+          <span>
+            <strong className="text-[#c9d1d9]">▲ Best / ▼ Low</strong> highlights the highest and lowest score per pillar across the comparison set. Comparisons are locked to one service type — adding a service from Browse automatically sets the type for the whole set.
+          </span>
+        </div>
+
+        <div className="flex items-center justify-between mt-4">
+          <Link href="/browse" className="text-[13px] text-[#79c0ff] font-medium hover:underline">
             ← Back to Browse
           </Link>
         </div>
