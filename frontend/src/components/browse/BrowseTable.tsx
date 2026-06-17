@@ -2,6 +2,17 @@ import { ServiceRow } from "./ServiceRow";
 import type { ServiceListItem, PillarBreakdown } from "@/lib/types";
 import { PILLAR_LABELS } from "@/lib/scoring";
 
+// 3-char labels keep each header narrower than the 28px GradeBadge, so the
+// badge drives column width and all six pillar columns end up identical.
+const PILLAR_ABBREVS: Record<keyof PillarBreakdown, string> = {
+  transparency:    "Trn",
+  reliability:     "Rel",
+  security:        "Sec",
+  privacy:         "Pri",
+  safety_societal: "Saf",
+  excessive_agency:"Agc",
+};
+
 type SortKey = "composite_desc" | "confidence_desc" | "security_desc" | "updated_desc";
 
 const SORT_OPTIONS: { value: SortKey; label: string }[] = [
@@ -22,7 +33,7 @@ interface Props {
   canAddToCompare: (s: ServiceListItem) => boolean;
 }
 
-const PILLAR_ENTRIES = Object.entries(PILLAR_LABELS) as [keyof PillarBreakdown, string][];
+const PILLAR_ENTRIES = Object.entries(PILLAR_ABBREVS) as [keyof PillarBreakdown, string][];
 
 const thBase = "text-[10px] font-semibold uppercase tracking-[0.5px] text-[#8b949e]";
 
@@ -37,21 +48,20 @@ export function BrowseTable({ services, total, sortKey, onSortChange, compareIds
 
   return (
     <div className="overflow-x-auto">
-      {/* table-fixed: column widths from <th> widths, not content — enforces equal pillar columns */}
-      <table className="w-full border-separate [border-spacing:0_4px] table-fixed">
+      <table className="w-full border-separate [border-spacing:0_4px]">
         <thead>
           <tr>
-            <th className={`${thBase} pb-2.5 text-left pl-3`}>
+            <th className={`${thBase} pb-2.5 text-left pl-3 whitespace-nowrap`}>
               Service
             </th>
-            {PILLAR_ENTRIES.map(([key, label]) => (
-              <th key={key} title={label} className={`${thBase} w-10 pb-2.5 text-right pr-1.5`}>
-                <span className="sr-only">{label}</span>
+            {PILLAR_ENTRIES.map(([key, abbrev]) => (
+              <th key={key} title={PILLAR_LABELS[key]} className={`${thBase} pb-2.5 text-right pr-1.5 whitespace-nowrap`}>
+                {abbrev}
               </th>
             ))}
-            <th className={`${thBase} w-[68px] pb-2.5 text-center`}>Score</th>
-            <th className={`${thBase} w-[72px] pb-2.5 text-center`}>Confidence</th>
-            <th className="w-[100px] pb-2.5" />
+            <th className={`${thBase} pb-2.5 text-center whitespace-nowrap`}>Score</th>
+            <th className={`${thBase} pb-2.5 text-center whitespace-nowrap`}>Confidence</th>
+            <th className="pb-2.5" />
           </tr>
         </thead>
         <tbody>

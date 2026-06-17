@@ -60,7 +60,7 @@ export function ServiceRow({ service, isInCompare, onAddToCompare, onRemoveFromC
 
       {/* Per-pillar grade badges */}
       {PILLAR_KEYS.map((key) => (
-        <td key={key} className={`${tdBase} w-10 text-right pr-1.5`}>
+        <td key={key} className={`${tdBase} text-right pr-1.5`}>
           {pillarGrades[key] ? (
             <GradeBadge grade={pillarGrades[key]!} size="sm" variant="dark" />
           ) : (
