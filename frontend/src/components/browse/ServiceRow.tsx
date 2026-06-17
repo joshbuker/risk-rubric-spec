@@ -60,7 +60,7 @@ export function ServiceRow({ service, isInCompare, onAddToCompare, onRemoveFromC
 
       {/* Per-pillar grade badges */}
       {PILLAR_KEYS.map((key) => (
-        <td key={key} className={`${tdBase} text-right pr-1.5`}>
+        <td key={key} className={`${tdBase} px-1 text-center`}>
           {pillarGrades[key] ? (
             <GradeBadge grade={pillarGrades[key]!} size="sm" variant="dark" />
           ) : (
@@ -91,7 +91,7 @@ export function ServiceRow({ service, isInCompare, onAddToCompare, onRemoveFromC
 
       {/* Actions */}
       <td className={`${tdLast} px-2`}>
-        <div className="flex gap-[5px]">
+        <div className="flex justify-end gap-[5px]">
           <Link
             href={`/services/${service.id}`}
             className="bg-[#21262d] border border-[#30363d] text-[#79c0ff] rounded px-[9px] py-[3px] text-[11px] hover:border-[#79c0ff] whitespace-nowrap"

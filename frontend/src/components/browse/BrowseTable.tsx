@@ -44,10 +44,8 @@ export function BrowseTable({ services, total, sortKey, onSortChange, compareIds
               Service
             </th>
             {PILLAR_ENTRIES.map(([key, label]) => (
-              <th key={key} className={`${thBase} align-bottom pb-1 text-center`}>
-                <span style={{ writingMode: "vertical-rl", transform: "rotate(180deg)", whiteSpace: "nowrap", display: "block" }}>
-                  {label}
-                </span>
+              <th key={key} className={`${thBase} px-1 pb-2.5 text-center whitespace-nowrap`}>
+                {label}
               </th>
             ))}
             <th className={`${thBase} pb-2.5 text-center whitespace-nowrap`}>Score</th>
