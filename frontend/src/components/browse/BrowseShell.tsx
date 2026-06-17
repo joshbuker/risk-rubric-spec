@@ -87,9 +87,9 @@ export function BrowseShell() {
   }
 
   return (
-    <div className="bg-[#0d1117] min-h-screen">
+    <div className="bg-[#0d1117] min-h-screen flex flex-col">
       <TypeTabs active={activeTab} counts={counts} onChange={setActiveTab} />
-      <div className="flex">
+      <div className="flex flex-1">
         <SidebarFilters
           activeTab={activeTab}
           services={services}

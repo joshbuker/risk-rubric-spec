@@ -23,7 +23,7 @@ export function TopNav() {
   return (
     <nav className="bg-[#161b22] border-b border-[#30363d] px-6 flex items-center gap-6 h-[52px]">
       <span className="text-[#79c0ff] font-bold text-[15px] tracking-tight shrink-0">
-        RiskRubric
+        Risk Rubric
       </span>
       <div className="flex items-center h-full">
         {NAV_LINKS.map(({ href, label }) => {

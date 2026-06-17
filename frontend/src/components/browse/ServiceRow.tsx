@@ -58,7 +58,7 @@ export function ServiceRow({ service, onAddToCompare, canAddToCompare }: Props) 
 
       {/* Per-pillar grade badges */}
       {PILLAR_KEYS.map((key) => (
-        <td key={key} className={`${tdBase} px-1 text-center`}>
+        <td key={key} className={`${tdBase} w-9 text-right pr-1.5`}>
           {pillarGrades[key] ? (
             <GradeBadge grade={pillarGrades[key]!} size="sm" variant="dark" />
           ) : (

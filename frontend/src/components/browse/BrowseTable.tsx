@@ -1,6 +1,15 @@
 import { ServiceRow } from "./ServiceRow";
-import type { ServiceListItem } from "@/lib/types";
+import type { ServiceListItem, PillarBreakdown } from "@/lib/types";
 import { PILLAR_LABELS } from "@/lib/scoring";
+
+const PILLAR_ABBREVS: Record<keyof PillarBreakdown, string> = {
+  transparency:    "Trans",
+  reliability:     "Rel",
+  security:        "Sec",
+  privacy:         "Priv",
+  safety_societal: "Safety",
+  excessive_agency:"Agency",
+};
 
 type SortKey = "composite_desc" | "confidence_desc" | "security_desc" | "updated_desc";
 
@@ -20,7 +29,7 @@ interface Props {
   canAddToCompare: (s: ServiceListItem) => boolean;
 }
 
-const PILLAR_ENTRIES = Object.entries(PILLAR_LABELS);
+const PILLAR_ENTRIES = Object.entries(PILLAR_ABBREVS) as [keyof PillarBreakdown, string][];
 
 export function BrowseTable({ services, total, sortKey, onSortChange, onAddToCompare, canAddToCompare }: Props) {
   if (services.length === 0) {
@@ -40,7 +49,7 @@ export function BrowseTable({ services, total, sortKey, onSortChange, onAddToCom
               Service
             </th>
             {PILLAR_ENTRIES.map(([key, label]) => (
-              <th key={key} className="px-1 pb-2.5 text-center text-[10px] font-semibold uppercase tracking-[0.5px] text-[#8b949e] whitespace-nowrap">
+              <th key={key} className="w-9 pb-2.5 text-right pr-1.5 text-[10px] font-semibold uppercase tracking-[0.5px] text-[#8b949e]">
                 {label}
               </th>
             ))}
