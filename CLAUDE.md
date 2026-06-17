@@ -105,7 +105,8 @@ components/
 hooks/
   useServices.ts        ← SWR wrapper around fetchServices(); keyed by [serviceType]
   useService.ts         ← SWR wrapper around fetchService(id)
-  useCompare.ts         ← localStorage compare-set state (wraps compare-store.ts)
+  useCompare.ts         ← React Context; exports CompareProvider + useCompare(). Provider lives in
+                           (public)/layout.tsx so TopNav badge and all page shells share one state.
 
 lib/
   api.ts                ← apiFetch helper; NEXT_PUBLIC_API_URL → http://localhost:8000/api/v1
@@ -117,7 +118,11 @@ lib/
 Key patterns:
 - Pages are server components by default; interactive shells are `"use client"` components
 - Data fetching uses SWR (`useSWR`) — no direct fetch in components
-- Compare set persists to `localStorage` and is type-locked to the first added service's `service_type`
+- Compare set persists to `localStorage`, type-locked to first service's `service_type`, max 4
+- Compare button is a **toggle** — clicking when already added removes the service (both Browse and Detail)
+- Browse URL params: `?q=` (search), `?tab=ai_model|mcp_server` (initial active tab). Breadcrumbs,
+  Back-to-Browse, and Add-from-Browse all set `?tab=` to land on the correct tab.
+- `BrowseShell` uses `min-h-[calc(100vh-52px)]` — accounts for 52px TopNav so no overflow scroll
 - Frontend tests live in `frontend/tests/` (not colocated), use Jest + JSDOM + Testing Library
 
 ### Backend structure (`backend/app/`)
@@ -179,7 +184,7 @@ When a scanner submits scores, the platform matches the submitted identity tuple
 
 ## Working Style
 
-- Work directly on a feature branch in this repo — avoid git worktrees
+- Work directly on `main` in this repo — avoid git worktrees
 - All implementation plans are in `docs/superpowers/plans/`
 - Use `superpowers:subagent-driven-development` to execute plans task by task
 - All backend tests run against a real PostgreSQL test database — no mocks (see `tests/conftest.py` transaction-rollback fixture pattern)
