@@ -35,8 +35,11 @@ class ServiceListItem(BaseModel):
     # Per-type detail fields (for subtitle + sidebar filters)
     engine_provider: str | None = None
     platform_provider: str | None = None
+    model_version: str | None = None
     provider_org: str | None = None
     target_service: str | None = None
+    provider_tier: str | None = None
+    hosting_type: str | None = None
     # Aggregate pillar scores across all scanners (for per-column grade badges)
     pillar_scores: dict | None = None
 

@@ -33,8 +33,11 @@ export interface ServiceListItem {
   // Provider detail (for subtitle + sidebar filters); optional for backward-compat
   engine_provider?: string | null;
   platform_provider?: string | null;
+  model_version?: string | null;
   provider_org?: string | null;
   target_service?: string | null;
+  provider_tier?: string | null;
+  hosting_type?: string | null;
   // Aggregate pillar scores (for per-column grade badges)
   pillar_scores?: PillarBreakdown | null;
 }

@@ -11,12 +11,13 @@ const BAR_CLASSES: Record<Grade, string> = {
 interface Props {
   score: number; // 0–1000
   grade: Grade;
+  thick?: boolean;
 }
 
-export function ProgressBar({ score, grade }: Props) {
+export function ProgressBar({ score, grade, thick }: Props) {
   const pct = Math.min(100, Math.max(0, score / 10));
   return (
-    <div className="h-2 w-full rounded-full bg-[#21262d] overflow-hidden">
+    <div className={`w-full rounded-full bg-[#21262d] overflow-hidden ${thick ? "h-3" : "h-2"}`}>
       <div
         className={`h-full rounded-full ${BAR_CLASSES[grade]}`}
         style={{ width: `${pct}%` }}

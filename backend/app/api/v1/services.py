@@ -59,13 +59,17 @@ def _build_list_item(svc: Service, latest_scores: list[Score]) -> ServiceListIte
     composite = compute_composite(agg) if agg else None
     most_recent = max((s.scored_at for s in latest_scores), default=None)
 
-    engine_provider = platform_provider = provider_org = target_service = None
+    engine_provider = platform_provider = model_version = None
+    provider_org = target_service = provider_tier = hosting_type = None
     if svc.service_type == "ai_model" and svc.model_detail:
         engine_provider = svc.model_detail.engine_provider
         platform_provider = svc.model_detail.platform_provider
+        model_version = svc.model_detail.model_version
     elif svc.service_type == "mcp_server" and svc.mcp_detail:
         provider_org = svc.mcp_detail.provider_org
         target_service = svc.mcp_detail.target_service
+        provider_tier = svc.mcp_detail.provider_tier
+        hosting_type = svc.mcp_detail.hosting_type
 
     return ServiceListItem(
         id=svc.id,
@@ -80,8 +84,11 @@ def _build_list_item(svc: Service, latest_scores: list[Score]) -> ServiceListIte
         scored_at=most_recent,
         engine_provider=engine_provider,
         platform_provider=platform_provider,
+        model_version=model_version,
         provider_org=provider_org,
         target_service=target_service,
+        provider_tier=provider_tier,
+        hosting_type=hosting_type,
         pillar_scores=agg if agg else None,
     )
 

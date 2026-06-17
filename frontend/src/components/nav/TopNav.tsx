@@ -5,9 +5,8 @@ import { useCompare } from "@/hooks/useCompare";
 import { useState } from "react";
 
 const NAV_LINKS = [
-  { href: "/browse",  label: "Browse"   },
-  { href: "/compare", label: "Compare"  },
-  { href: "/scanners", label: "Scanners" },
+  { href: "/browse",  label: "Browse"  },
+  { href: "/compare", label: "Compare" },
 ];
 
 export function TopNav() {
