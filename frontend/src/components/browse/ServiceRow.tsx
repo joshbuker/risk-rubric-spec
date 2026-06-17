@@ -5,7 +5,9 @@ import { PILLAR_KEYS, getGrade } from "@/lib/scoring";
 
 interface Props {
   service: ServiceListItem;
+  isInCompare: boolean;
   onAddToCompare: (s: ServiceListItem) => void;
+  onRemoveFromCompare: (s: ServiceListItem) => void;
   canAddToCompare: boolean;
 }
 
@@ -20,7 +22,7 @@ function subtitle(s: ServiceListItem): string {
   return "";
 }
 
-export function ServiceRow({ service, onAddToCompare, canAddToCompare }: Props) {
+export function ServiceRow({ service, isInCompare, onAddToCompare, onRemoveFromCompare, canAddToCompare }: Props) {
   const pillarGrades = PILLAR_KEYS.reduce<Partial<Record<string, Grade>>>((acc, key) => {
     const score = service.pillar_scores?.[key];
     if (score != null) acc[key] = getGrade(score);
@@ -58,7 +60,7 @@ export function ServiceRow({ service, onAddToCompare, canAddToCompare }: Props) 
 
       {/* Per-pillar grade badges */}
       {PILLAR_KEYS.map((key) => (
-        <td key={key} className={`${tdBase} w-9 text-right pr-1.5`}>
+        <td key={key} className={`${tdBase} w-10 text-right pr-1.5`}>
           {pillarGrades[key] ? (
             <GradeBadge grade={pillarGrades[key]!} size="sm" variant="dark" />
           ) : (
@@ -96,13 +98,22 @@ export function ServiceRow({ service, onAddToCompare, canAddToCompare }: Props) 
           >
             View
           </Link>
-          <button
-            onClick={() => onAddToCompare(service)}
-            disabled={!canAddToCompare}
-            className="bg-[#21262d] border border-[#30363d] text-[#8b949e] rounded px-[9px] py-[3px] text-[11px] hover:text-[#c9d1d9] hover:border-[#8b949e] disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
-          >
-            +Compare
-          </button>
+          {isInCompare ? (
+            <button
+              onClick={() => onRemoveFromCompare(service)}
+              className="bg-[#1a3a2a] border border-[#2ea04326] text-[#56d364] rounded px-[9px] py-[3px] text-[11px] hover:bg-[#162c20] hover:border-[#56d364] whitespace-nowrap"
+            >
+              ✓ Comparing
+            </button>
+          ) : (
+            <button
+              onClick={() => onAddToCompare(service)}
+              disabled={!canAddToCompare}
+              className="bg-[#21262d] border border-[#30363d] text-[#8b949e] rounded px-[9px] py-[3px] text-[11px] hover:text-[#c9d1d9] hover:border-[#8b949e] disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
+            >
+              +Compare
+            </button>
+          )}
         </div>
       </td>
     </tr>

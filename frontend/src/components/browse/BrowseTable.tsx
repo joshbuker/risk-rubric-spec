@@ -2,15 +2,6 @@ import { ServiceRow } from "./ServiceRow";
 import type { ServiceListItem, PillarBreakdown } from "@/lib/types";
 import { PILLAR_LABELS } from "@/lib/scoring";
 
-const PILLAR_ABBREVS: Record<keyof PillarBreakdown, string> = {
-  transparency:    "Trans",
-  reliability:     "Rel",
-  security:        "Sec",
-  privacy:         "Priv",
-  safety_societal: "Safety",
-  excessive_agency:"Agency",
-};
-
 type SortKey = "composite_desc" | "confidence_desc" | "security_desc" | "updated_desc";
 
 const SORT_OPTIONS: { value: SortKey; label: string }[] = [
@@ -25,13 +16,17 @@ interface Props {
   total: number;
   sortKey: SortKey;
   onSortChange: (k: SortKey) => void;
+  compareIds: Set<string>;
   onAddToCompare: (s: ServiceListItem) => void;
+  onRemoveFromCompare: (s: ServiceListItem) => void;
   canAddToCompare: (s: ServiceListItem) => boolean;
 }
 
-const PILLAR_ENTRIES = Object.entries(PILLAR_ABBREVS) as [keyof PillarBreakdown, string][];
+const PILLAR_ENTRIES = Object.entries(PILLAR_LABELS) as [keyof PillarBreakdown, string][];
 
-export function BrowseTable({ services, total, sortKey, onSortChange, onAddToCompare, canAddToCompare }: Props) {
+const thBase = "text-[10px] font-semibold uppercase tracking-[0.5px] text-[#8b949e]";
+
+export function BrowseTable({ services, total, sortKey, onSortChange, compareIds, onAddToCompare, onRemoveFromCompare, canAddToCompare }: Props) {
   if (services.length === 0) {
     return (
       <div className="text-center text-[#8b949e] py-16 text-[13px]">
@@ -42,20 +37,21 @@ export function BrowseTable({ services, total, sortKey, onSortChange, onAddToCom
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full border-separate [border-spacing:0_4px]">
+      {/* table-fixed: column widths from <th> widths, not content — enforces equal pillar columns */}
+      <table className="w-full border-separate [border-spacing:0_4px] table-fixed">
         <thead>
           <tr>
-            <th className="px-3 pb-2.5 text-left text-[10px] font-semibold uppercase tracking-[0.5px] text-[#8b949e] whitespace-nowrap">
+            <th className={`${thBase} pb-2.5 text-left pl-3`}>
               Service
             </th>
             {PILLAR_ENTRIES.map(([key, label]) => (
-              <th key={key} className="w-9 pb-2.5 text-right pr-1.5 text-[10px] font-semibold uppercase tracking-[0.5px] text-[#8b949e]">
-                {label}
+              <th key={key} title={label} className={`${thBase} w-10 pb-2.5 text-right pr-1.5`}>
+                <span className="sr-only">{label}</span>
               </th>
             ))}
-            <th className="px-1 pb-2.5 text-center text-[10px] font-semibold uppercase tracking-[0.5px] text-[#8b949e]">Score</th>
-            <th className="px-1 pb-2.5 text-center text-[10px] font-semibold uppercase tracking-[0.5px] text-[#8b949e]">Confidence</th>
-            <th className="pb-2.5" />
+            <th className={`${thBase} w-[68px] pb-2.5 text-center`}>Score</th>
+            <th className={`${thBase} w-[72px] pb-2.5 text-center`}>Confidence</th>
+            <th className="w-[100px] pb-2.5" />
           </tr>
         </thead>
         <tbody>
@@ -63,7 +59,9 @@ export function BrowseTable({ services, total, sortKey, onSortChange, onAddToCom
             <ServiceRow
               key={s.id}
               service={s}
+              isInCompare={compareIds.has(s.id)}
               onAddToCompare={onAddToCompare}
+              onRemoveFromCompare={onRemoveFromCompare}
               canAddToCompare={canAddToCompare(s)}
             />
           ))}

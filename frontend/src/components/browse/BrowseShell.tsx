@@ -1,6 +1,6 @@
 "use client";
 import { useState, useMemo } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useServices } from "@/hooks/useServices";
 import { useCompare } from "@/hooks/useCompare";
 import { TypeTabs } from "./TypeTabs";
@@ -19,11 +19,13 @@ function tierOf(confidence: number): ConfidenceTier {
 }
 
 export function BrowseShell() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("q")?.toLowerCase() ?? "";
+  const tabParam = searchParams.get("tab") as ServiceType | null;
 
-  const [activeTab, setActiveTab] = useState<ServiceType>("ai_model");
+  const [activeTab, setActiveTab] = useState<ServiceType>(
+    tabParam === "mcp_server" ? "mcp_server" : "ai_model"
+  );
   const [selectedGrades, setSelectedGrades] = useState<Grade[]>(["A", "B", "C", "D", "F"]);
   const [confidenceTiers, setConfidenceTiers] = useState<Set<ConfidenceTier>>(new Set(["1", "2", "3+"]));
   const [excludedProviders, setExcludedProviders] = useState<Set<string>>(new Set());
@@ -31,7 +33,8 @@ export function BrowseShell() {
   const [sortKey, setSortKey] = useState<SortKey>("composite_desc");
 
   const { data: services = [], isLoading } = useServices();
-  const { add, canAdd, count } = useCompare();
+  const { add, remove, canAdd, items } = useCompare();
+  const compareIds = useMemo(() => new Set(items.map((i) => i.id)), [items]);
 
   const counts = useMemo(() => {
     const matches = (s: ServiceListItem) => {
@@ -83,11 +86,14 @@ export function BrowseShell() {
 
   function handleAddToCompare(s: ServiceListItem) {
     add({ id: s.id, service_type: s.service_type, name: s.name });
-    if (count + 1 >= 2) router.push("/compare");
+  }
+
+  function handleRemoveFromCompare(s: ServiceListItem) {
+    remove(s.id);
   }
 
   return (
-    <div className="bg-[#0d1117] min-h-screen flex flex-col">
+    <div className="bg-[#0d1117] min-h-[calc(100vh-52px)] flex flex-col">
       <TypeTabs active={activeTab} counts={counts} onChange={setActiveTab} />
       <div className="flex flex-1">
         <SidebarFilters
@@ -111,7 +117,9 @@ export function BrowseShell() {
               total={filtered.length}
               sortKey={sortKey}
               onSortChange={setSortKey}
+              compareIds={compareIds}
               onAddToCompare={handleAddToCompare}
+              onRemoveFromCompare={handleRemoveFromCompare}
               canAddToCompare={(s) => canAdd(s.service_type)}
             />
           )}

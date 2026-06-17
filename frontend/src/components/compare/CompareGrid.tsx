@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ServiceColumnHeader } from "./ServiceColumnHeader";
 import { GradeBadge } from "@/components/ui/GradeBadge";
 import { ProgressBar } from "@/components/ui/ProgressBar";
@@ -15,8 +16,11 @@ const PILLAR_NOTES: Partial<Record<keyof PillarBreakdown, string>> = {
 };
 
 export function CompareGrid({ services, onRemove }: Props) {
+  const canAddMore = services.length < 4;
   const serviceColWidth = `minmax(180px, 1fr)`;
-  const gridCols = `190px repeat(${services.length}, ${serviceColWidth}) 130px`;
+  const gridCols = canAddMore
+    ? `190px repeat(${services.length}, ${serviceColWidth}) 130px`
+    : `190px repeat(${services.length}, ${serviceColWidth})`;
 
   return (
     <div className="bg-[#0d1117] rounded-xl border border-[#30363d] overflow-hidden overflow-x-auto">
@@ -29,9 +33,17 @@ export function CompareGrid({ services, onRemove }: Props) {
         {services.map((s) => (
           <ServiceColumnHeader key={s.id} service={s} onRemove={() => onRemove(s.id)} />
         ))}
-        <div className="px-3 py-4 bg-[#161b22] border-l border-[#30363d] border-b-2 border-b-[#30363d] flex items-center justify-center">
-          <span className="text-[11px] font-bold uppercase text-[#8b949e]">Add</span>
-        </div>
+        {canAddMore && (
+          <div className="border-l border-[#30363d] border-b-2 border-b-[#30363d] bg-[#161b22] flex items-center justify-center">
+            <Link
+              href="/browse"
+              className="flex flex-col items-center gap-1 p-3 rounded-lg border border-dashed border-[#30363d] hover:border-[#8b949e] text-[#8b949e] hover:text-[#c9d1d9] transition-colors text-center"
+            >
+              <span className="text-xl leading-none">+</span>
+              <span className="text-[10px] font-medium">Add from<br />Browse</span>
+            </Link>
+          </div>
+        )}
 
         {/* Composite summary row */}
         <div className="px-4 py-3 bg-[#161b22] border-b border-[#30363d] flex items-center">
@@ -51,7 +63,7 @@ export function CompareGrid({ services, onRemove }: Props) {
             </div>
           );
         })}
-        <div className="border-l border-[#30363d] bg-[#161b22] border-b border-b-[#30363d]" />
+        {canAddMore && <div className="border-l border-[#30363d] bg-[#161b22] border-b border-b-[#30363d]" />}
 
         {/* Pillar rows */}
         {PILLAR_KEYS.map((key) => {
@@ -91,7 +103,7 @@ export function CompareGrid({ services, onRemove }: Props) {
                   </div>
                 );
               })}
-              <div className="border-l border-[#30363d] bg-[#161b22] border-b border-[#21262d]" />
+              {canAddMore && <div className="border-l border-[#30363d] bg-[#161b22] border-b border-[#21262d]" />}
             </React.Fragment>
           );
         })}
