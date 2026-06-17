@@ -60,7 +60,7 @@ export default function ServiceDetailPage() {
           </p>
           <div className="flex items-center gap-2">
             <Link
-              href="/browse"
+              href={`/browse?tab=${service.service_type}`}
               className="text-[13px] font-semibold px-4 py-2 rounded-lg bg-[#21262d] border border-[#30363d] text-[#c9d1d9] hover:border-[#8b949e]"
             >
               ↩ Back to Browse
