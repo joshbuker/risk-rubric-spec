@@ -67,7 +67,7 @@ export function CompareShell() {
         </div>
 
         {services.length > 0 && (
-          <CompareGrid services={services} onRemove={remove} />
+          <CompareGrid services={services} onRemove={remove} lockedType={lockedType} />
         )}
 
         <div className="flex items-center gap-2 bg-[#161b22] border border-[#30363d] rounded-lg px-3.5 py-2.5 mt-4 text-[11px] text-[#8b949e]">

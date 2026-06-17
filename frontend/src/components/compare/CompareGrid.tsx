@@ -9,13 +9,14 @@ import React from "react";
 interface Props {
   services: ServiceDetail[];
   onRemove: (id: string) => void;
+  lockedType?: string | null;
 }
 
 const PILLAR_NOTES: Partial<Record<keyof PillarBreakdown, string>> = {
   security: "· highest",
 };
 
-export function CompareGrid({ services, onRemove }: Props) {
+export function CompareGrid({ services, onRemove, lockedType }: Props) {
   const canAddMore = services.length < 4;
   const serviceColWidth = `minmax(180px, 1fr)`;
   const gridCols = canAddMore
@@ -36,7 +37,7 @@ export function CompareGrid({ services, onRemove }: Props) {
         {canAddMore && (
           <div className="border-l border-[#30363d] border-b-2 border-b-[#30363d] bg-[#161b22] flex items-center justify-center">
             <Link
-              href="/browse"
+              href={lockedType ? `/browse?tab=${lockedType}` : "/browse"}
               className="flex flex-col items-center gap-1 p-3 rounded-lg border border-dashed border-[#30363d] hover:border-[#8b949e] text-[#8b949e] hover:text-[#c9d1d9] transition-colors text-center"
             >
               <span className="text-xl leading-none">+</span>
