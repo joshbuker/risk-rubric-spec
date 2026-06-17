@@ -33,11 +33,21 @@ export function BrowseShell() {
   const { data: services = [], isLoading } = useServices();
   const { add, canAdd, count } = useCompare();
 
-  const counts = useMemo(() => ({
-    ai_model:   services.filter((s) => s.service_type === "ai_model").length,
-    mcp_server: services.filter((s) => s.service_type === "mcp_server").length,
-    agent: 0,
-  }), [services]);
+  const counts = useMemo(() => {
+    const matches = (s: ServiceListItem) => {
+      if (s.composite_score == null) return false;
+      const grade = s.grade ?? getGrade(s.composite_score);
+      if (!selectedGrades.includes(grade)) return false;
+      if (!confidenceTiers.has(tierOf(s.confidence))) return false;
+      if (searchQuery && !s.name.toLowerCase().includes(searchQuery)) return false;
+      return true;
+    };
+    return {
+      ai_model:   services.filter((s) => s.service_type === "ai_model"   && matches(s)).length,
+      mcp_server: services.filter((s) => s.service_type === "mcp_server" && matches(s)).length,
+      agent: 0,
+    };
+  }, [services, selectedGrades, confidenceTiers, searchQuery]);
 
   const filtered = useMemo(() => {
     let list = services.filter((s) => {
