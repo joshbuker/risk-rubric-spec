@@ -116,6 +116,7 @@ class Score(Base):
     composite_score = Column(Float, nullable=False)
     coi_disclosed = Column(Boolean, nullable=False, default=False)
     scored_at = Column(DateTime, nullable=False)
+    report_url = Column(String, nullable=True)
     created_at = Column(DateTime, default=func.now())
 
     service = relationship("Service", back_populates="scores")

@@ -105,6 +105,7 @@ def submit_scores(
         composite_score=payload.scores.composite,
         coi_disclosed=payload.coi_disclosed,
         scored_at=payload.scored_at,
+        report_url=str(payload.report_url) if payload.report_url else None,
     ))
 
     if flagged:

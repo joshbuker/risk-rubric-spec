@@ -19,6 +19,7 @@ class ScannerScoreSummary(BaseModel):
     pillars: PillarBreakdown
     scored_at: datetime
     evidence: list[dict]
+    report_url: str | None = None
 
 
 class ServiceListItem(BaseModel):

@@ -33,6 +33,7 @@ def _valid_payload(scored_at=None) -> dict:
         "scores": {**pillars, "composite": composite},
         "evidence": [{"label": "Audit report", "url": "https://example.com/audit.pdf"}],
         "scored_at": (scored_at or datetime.now(timezone.utc).replace(tzinfo=None)).isoformat(),
+        "report_url": "https://pointguard.example.com/reports/claude-sonnet-4-6",
     }
 
 
@@ -70,6 +71,24 @@ def test_submission_rejects_composite_out_of_tolerance(client, db):
     assert resp.status_code == 422
 
 
+def test_submission_rejects_missing_report_url(client, db):
+    _, key = _make_scanner(db)
+    payload = _valid_payload()
+    del payload["report_url"]
+    resp = client.post("/api/v1/scores", json=payload,
+                       headers={"Authorization": f"Bearer {key}"})
+    assert resp.status_code == 422
+
+
+def test_submission_rejects_invalid_report_url(client, db):
+    _, key = _make_scanner(db)
+    payload = _valid_payload()
+    payload["report_url"] = "not-a-url"
+    resp = client.post("/api/v1/scores", json=payload,
+                       headers={"Authorization": f"Bearer {key}"})
+    assert resp.status_code == 422
+
+
 def test_submission_rejects_future_scored_at(client, db):
     _, key = _make_scanner(db)
     payload = _valid_payload(scored_at=datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(days=1))
@@ -97,6 +116,7 @@ def test_submission_creates_service_and_score(client, db):
     score = db.query(Score).filter(Score.service_id == svc.id).first()
     assert score is not None
     assert score.security_score == 800.0
+    assert score.report_url == "https://pointguard.example.com/reports/claude-sonnet-4-6"
 
 
 def test_submission_appends_score_on_resubmit(client, db):

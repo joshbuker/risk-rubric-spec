@@ -76,6 +76,19 @@ export function ScannerAccordion({ scanner, aggregatePillars }: Props) {
             })}
           </div>
 
+          {scanner.report_url && isSafeUrl(scanner.report_url) && (
+            <div className="mt-3 pt-3 border-t border-[#21262d]">
+              <a
+                href={scanner.report_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#79c0ff] border border-[#30363d] rounded px-3 py-1.5 hover:border-[#58a6ff] hover:bg-[#161b22] transition-colors"
+              >
+                View Full Report ↗
+              </a>
+            </div>
+          )}
+
           {scanner.evidence.length > 0 && (
             <div className="mt-3 pt-3 border-t border-[#21262d]">
               <div className="text-[11px] font-bold uppercase tracking-[0.5px] text-[#8b949e] mb-1.5">

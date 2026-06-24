@@ -1,6 +1,6 @@
 from __future__ import annotations
 from datetime import datetime, timezone
-from pydantic import BaseModel, field_validator, model_validator
+from pydantic import AnyHttpUrl, BaseModel, field_validator, model_validator
 from typing import Literal
 
 
@@ -53,6 +53,7 @@ class ScoreSubmissionRequest(BaseModel):
     evidence: list[EvidenceItem] = []
     scored_at: datetime
     coi_disclosed: bool = False
+    report_url: AnyHttpUrl
 
     @model_validator(mode="after")
     def scored_at_not_future(self) -> "ScoreSubmissionRequest":

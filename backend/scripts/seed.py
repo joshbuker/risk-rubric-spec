@@ -27,6 +27,12 @@ SCANNER_DEFS = [
     ("PointGuard Scanner",    "PointGuard", "ptg"),
 ]
 
+SCANNER_REPORT_BASE = {
+    "dltt": "https://reports.deloitte.com/ai-security",
+    "tmrk": "https://platform.tumeryk.com/reports",
+    "ptg":  "https://portal.pointguard.io/assessments",
+}
+
 MODEL_DEFS = [
     {
         "name": "Claude Opus 4.8",
@@ -195,6 +201,7 @@ def _seed_scores(db, scanners: dict, services: dict) -> None:
             composite_score=composite,
             scored_at=SCORED_AT,
             coi_disclosed=False,
+            report_url=f"{SCANNER_REPORT_BASE[scn_slug]}/{svc_slug}",
         ))
         print(f"  {svc_slug}/{scn_slug}: composite={composite:.1f} ({_grade(composite)})")
 

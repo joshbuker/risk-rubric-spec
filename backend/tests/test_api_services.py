@@ -4,7 +4,7 @@ from app.services.keys import generate_api_key, hash_key
 from app.services.scoring import compute_composite, PILLAR_WEIGHTS
 
 
-def _seed_service_with_score(db, model_version="20250514", days_ago=1) -> Service:
+def _seed_service_with_score(db, model_version="20250514", days_ago=1, report_url="https://pointguard.example.com/reports/test") -> Service:
     svc = Service(name="Claude Sonnet 4.6 (Direct API)", slug="claude-sonnet-4-6-direct-api",
                   service_type="ai_model")
     db.add(svc)
@@ -25,6 +25,7 @@ def _seed_service_with_score(db, model_version="20250514", days_ago=1) -> Servic
         privacy_score=800, safety_societal_score=800, excessive_agency_score=800,
         composite_score=compute_composite(pillars),
         scored_at=datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=days_ago),
+        report_url=report_url,
     ))
     db.flush()
     return svc
@@ -59,6 +60,21 @@ def test_detail_returns_pillar_breakdown(client, db):
     assert data["pillars"]["security"] == 800.0
     assert len(data["scanners"]) == 1
     assert data["scanners"][0]["scanner_name"] == "RiskRubric scanner powered by PointGuard"
+
+
+def test_detail_scanner_has_report_url(client, db):
+    svc = _seed_service_with_score(db)
+    resp = client.get(f"/api/v1/services/{svc.id}")
+    assert resp.status_code == 200
+    scanner = resp.json()["scanners"][0]
+    assert scanner["report_url"] == "https://pointguard.example.com/reports/test"
+
+
+def test_detail_scanner_report_url_null_when_absent(client, db):
+    svc = _seed_service_with_score(db, report_url=None)
+    resp = client.get(f"/api/v1/services/{svc.id}")
+    assert resp.status_code == 200
+    assert resp.json()["scanners"][0]["report_url"] is None
 
 
 def test_detail_stale_flag(client, db):

@@ -130,6 +130,7 @@ def get_service(service_id: str, db: Session = Depends(get_db)):
             pillars=PillarBreakdown(**_pillar_dict(score)),
             scored_at=score.scored_at,
             evidence=[],
+            report_url=score.report_url,
         ))
 
     return ServiceDetail(**base.model_dump(), pillars=pillars, scanners=scanner_summaries)

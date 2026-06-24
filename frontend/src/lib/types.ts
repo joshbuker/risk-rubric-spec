@@ -18,6 +18,7 @@ export interface ScannerScore {
   pillars: PillarBreakdown;
   scored_at: string;
   evidence: { label: string; url: string }[];
+  report_url: string | null;
 }
 
 export interface ServiceListItem {
