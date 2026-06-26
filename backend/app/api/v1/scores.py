@@ -6,7 +6,11 @@ from slugify import slugify
 
 from app.db.session import get_db
 from app.db.models import Scanner, Service, ServiceModel, ServiceMcpServer, Score, IdentityMatchFlag
-from app.schemas.scores import ScoreSubmissionRequest, ScoreSubmissionResponse
+from app.schemas.scores import (
+    AiModelScoreSubmission,
+    McpServerScoreSubmission,
+    ScoreSubmissionResponse,
+)
 from app.services.identity import match_service
 from app.services.keys import verify_key
 from app.services.scoring import validate_composite_tolerance, PILLAR_KEYS
@@ -34,12 +38,17 @@ def _derive_service_name(service_type: str, identity: dict) -> str:
     return "Unknown Service"
 
 
-def _get_or_create_service(db: Session, service_input, match_result: tuple) -> tuple[Service, str, bool]:
+def _get_or_create_service(
+    db: Session,
+    service_type: str,
+    external_id: str | None,
+    identity: dict,
+    match_result: tuple,
+) -> tuple[Service, str, bool]:
     svc, tier, flagged = match_result
 
     if svc is None:
-        identity = service_input.identity.model_dump()
-        name = _derive_service_name(service_input.service_type, identity)
+        name = _derive_service_name(service_type, identity)
         base_slug = slugify(name)
         slug = base_slug
         counter = 1
@@ -50,27 +59,29 @@ def _get_or_create_service(db: Session, service_input, match_result: tuple) -> t
         svc = Service(
             name=name,
             slug=slug,
-            service_type=service_input.service_type,
-            external_id=service_input.external_id,
+            service_type=service_type,
+            external_id=external_id,
         )
         db.add(svc)
         db.flush()
 
-        if service_input.service_type == "ai_model":
+        if service_type == "ai_model":
             db.add(ServiceModel(service_id=svc.id, **identity))
-        elif service_input.service_type == "mcp_server":
+        elif service_type == "mcp_server":
             db.add(ServiceMcpServer(service_id=svc.id, **identity))
         db.flush()
 
     return svc, tier, flagged
 
 
-@router.post("/scores", response_model=ScoreSubmissionResponse)
-def submit_scores(
+def _submit_scores(
     request: Request,
-    payload: ScoreSubmissionRequest,
-    db: Session = Depends(get_db),
-):
+    db: Session,
+    service_type: str,
+    external_id: str | None,
+    identity: dict,
+    payload,
+) -> ScoreSubmissionResponse:
     auth_header = request.headers.get("authorization")
     scanner = _authenticate_scanner(auth_header, db)
 
@@ -81,8 +92,7 @@ def submit_scores(
             detail="composite score is not within 5% of the weighted pillar sum",
         )
 
-    identity = payload.service.identity.model_dump()
-    match_result = match_service(db, payload.service.service_type, identity, payload.service.external_id)
+    match_result = match_service(db, service_type, identity, external_id)
 
     existing_identity = None
     matched_svc, match_tier, _ = match_result
@@ -91,7 +101,7 @@ def submit_scores(
         if detail:
             existing_identity = {k: getattr(detail, k, None) for k in identity}
 
-    svc, tier, flagged = _get_or_create_service(db, payload.service, match_result)
+    svc, tier, flagged = _get_or_create_service(db, service_type, external_id, identity, match_result)
 
     db.add(Score(
         service_id=svc.id,
@@ -125,4 +135,34 @@ def submit_scores(
         service_id=svc.id,
         match_tier=tier,
         review_flagged=flagged,
+    )
+
+
+@router.post("/scores/ai-model", response_model=ScoreSubmissionResponse)
+def submit_ai_model_scores(
+    request: Request,
+    payload: AiModelScoreSubmission,
+    db: Session = Depends(get_db),
+):
+    return _submit_scores(
+        request, db,
+        service_type="ai_model",
+        external_id=payload.external_id,
+        identity=payload.identity.model_dump(),
+        payload=payload,
+    )
+
+
+@router.post("/scores/mcp-server", response_model=ScoreSubmissionResponse)
+def submit_mcp_server_scores(
+    request: Request,
+    payload: McpServerScoreSubmission,
+    db: Session = Depends(get_db),
+):
+    return _submit_scores(
+        request, db,
+        service_type="mcp_server",
+        external_id=payload.external_id,
+        identity=payload.identity.model_dump(),
+        payload=payload,
     )

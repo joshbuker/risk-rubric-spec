@@ -41,14 +41,7 @@ class McpServerIdentity(BaseModel):
     hosting_type: Literal["hosted", "self_hosted"] = "hosted"
 
 
-class ServiceInput(BaseModel):
-    external_id: str | None = None
-    service_type: Literal["ai_model", "mcp_server", "agent"]
-    identity: AiModelIdentity | McpServerIdentity
-
-
-class ScoreSubmissionRequest(BaseModel):
-    service: ServiceInput
+class _ScoreSubmissionBase(BaseModel):
     scores: PillarScores
     evidence: list[EvidenceItem] = []
     scored_at: datetime
@@ -56,10 +49,20 @@ class ScoreSubmissionRequest(BaseModel):
     report_url: AnyHttpUrl
 
     @model_validator(mode="after")
-    def scored_at_not_future(self) -> "ScoreSubmissionRequest":
+    def scored_at_not_future(self) -> "_ScoreSubmissionBase":
         if self.scored_at.replace(tzinfo=None) > datetime.now(timezone.utc).replace(tzinfo=None):
             raise ValueError("scored_at must not be in the future")
         return self
+
+
+class AiModelScoreSubmission(_ScoreSubmissionBase):
+    external_id: str | None = None
+    identity: AiModelIdentity
+
+
+class McpServerScoreSubmission(_ScoreSubmissionBase):
+    external_id: str | None = None
+    identity: McpServerIdentity
 
 
 class ScoreSubmissionResponse(BaseModel):
