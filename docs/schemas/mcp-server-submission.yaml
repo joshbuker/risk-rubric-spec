@@ -1,0 +1,120 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# CSA Risk Rubric — MCP Server Score Submission
+# POST /api/v1/scores/mcp-server
+#
+# Submit scanner scores for a Model Context Protocol (MCP) server. On first
+# submission for a given server, a new service record is created automatically.
+# Subsequent submissions from any scanner append to the same record; the public
+# API always surfaces the latest score per scanner.
+#
+# Authentication: Bearer token  (Authorization: Bearer sk_<org>_...)
+# Content-Type:   application/json
+# ──────────────────────────────────────────────────────────────────────────────
+
+# Optional. Your organization's internal identifier for this service.
+# When provided and matched to an existing record, identity-tuple fuzzy
+# matching is bypassed entirely, giving a guaranteed high-confidence match.
+# Omit (or set to null) if you do not maintain external IDs.
+external_id: null
+
+identity:
+  # The external service or API that this MCP server wraps and exposes to
+  # AI agents. This identifies what the server does, not who built it.
+  # Examples: "GitHub", "Slack", "Google Drive", "Postgres", "Stripe"
+  target_service: GitHub
+
+  # The organization that builds and maintains this MCP server.
+  # May be the same as the target service's own org (official), an AI
+  # platform vendor (platform_bundled), or an independent third party.
+  provider_org: GitHub
+
+  # Relationship between the provider_org and the target_service.
+  # Must be one of:
+  #   official          — Built and maintained by the target service's own
+  #                       organization (e.g. GitHub's own MCP server for GitHub).
+  #   platform_bundled  — Included and maintained by an AI platform or IDE
+  #                       vendor as part of their product offering.
+  #   third_party       — Built by an independent organization unaffiliated
+  #                       with the target service.
+  provider_tier: official
+
+  # Whether the MCP server runs as a cloud-hosted service or on the user's
+  # own infrastructure. Must be one of:
+  #   hosted      — Runs on provider-managed infrastructure; the agent
+  #                 connects to it over the network.
+  #   self_hosted — Distributed for users to run locally or on their own
+  #                 servers (e.g. via Docker, npm, or a native binary).
+  hosting_type: hosted
+
+scores:
+  # Pillar scores measure the MCP server's performance across six dimensions
+  # of the CSA Risk Rubric methodology. All values are decimals in the range
+  # 0–1000 (inclusive). Higher is better.
+  #
+  # Pillar weights used to compute the composite:
+  #   transparency:      16 %
+  #   reliability:       16 %
+  #   security:          20 %
+  #   privacy:           16 %
+  #   safety_societal:   16 %
+  #   excessive_agency:  16 %
+
+  # How openly the MCP server documents its tools, permissions required,
+  # data access patterns, and operational boundaries.
+  transparency: 750
+
+  # Consistency and availability of the server under normal and adverse
+  # conditions; quality of error handling returned to the agent.
+  reliability: 800
+
+  # Resistance to prompt injection via tool responses, unauthorized data
+  # access, and other attack vectors introduced at the MCP layer.
+  security: 720
+
+  # Handling of user data accessed through the server — minimization,
+  # retention, and compliance with relevant data-protection standards.
+  privacy: 770
+
+  # Potential for the server to enable or amplify harmful agent actions
+  # at scale (e.g. mass deletions, unintended external communications).
+  safety_societal: 810
+
+  # Tendency of the server's tool definitions to encourage or allow the
+  # agent to take actions beyond what was explicitly requested by the user.
+  excessive_agency: 760
+
+  # Weighted composite score. Must be within 5 % of the value computed
+  # from the pillar scores above using the CSA weights; the API will
+  # reject the submission with HTTP 422 if the tolerance is exceeded.
+  # See: Risk Rubric v2 Scoring Methodology for the exact formula.
+  composite: 769
+
+# Optional. A list of artifacts that substantiate the scores above.
+# Include anything a reviewer could use to independently verify a finding:
+# audit reports, test harness outputs, published disclosures, etc.
+# The list may be empty.
+evidence:
+  - # Short human-readable label describing the artifact.
+    label: Full assessment report
+    # Publicly accessible URL to the artifact. Must be a valid URL.
+    url: https://scanner.example.com/reports/github-mcp-official-2026
+
+  - label: Tool-scope analysis
+    url: https://scanner.example.com/tests/github-mcp-tool-scope
+
+# ISO 8601 datetime recording when the assessment was performed —
+# i.e. when the scanner ran, not when this request is sent.
+# Must not be in the future. Timezone offset is accepted; naive
+# datetimes are treated as UTC.
+scored_at: "2026-06-20T14:30:00Z"
+
+# Set to true if your organization has a material relationship with the
+# MCP server's provider_org (e.g. financial interest, partnership,
+# contractual dependency). Disclosing a conflict of interest does not
+# prevent submission; it is recorded alongside the scores for transparency.
+coi_disclosed: false
+
+# Permanent URL to the human-readable report for this specific assessment.
+# Required. Must be a valid URL. This is what end-users will follow to read
+# the full findings behind the scores.
+report_url: https://scanner.example.com/reports/github-mcp-official-2026
