@@ -5,4 +5,8 @@ pkgs.mkShell {
     pkgs.python3
     pkgs.nodejs
   ];
+
+  shellHook = ''
+    exec ${pkgs.zsh}/bin/zsh
+  '';
 }
