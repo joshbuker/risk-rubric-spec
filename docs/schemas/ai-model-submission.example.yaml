@@ -1,0 +1,37 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# CSA Risk Rubric — AI Model Score Submission  [EXAMPLE]
+# POST /api/v1/scores/ai-model
+#
+# Concrete filled-in example for a Claude Sonnet 4.6 assessment.
+# See ai-model-submission.yaml for field definitions and type annotations.
+# ──────────────────────────────────────────────────────────────────────────────
+
+external_id: null
+
+identity:
+  engine_provider: Anthropic
+  platform_provider: null
+  model_name: Claude Sonnet 4.6
+  model_version: "20250514"
+
+scores:
+  transparency: 820
+  reliability: 810
+  security: 780
+  privacy: 800
+  safety_societal: 760
+  excessive_agency: 830
+  composite: 800
+
+evidence:
+  - label: Full assessment report
+    url: https://scanner.example.com/reports/claude-sonnet-4-6-20250514
+
+  - label: Prompt-injection test suite results
+    url: https://scanner.example.com/tests/claude-sonnet-4-6-injection
+
+scored_at: "2026-06-20T14:30:00Z"
+
+coi_disclosed: false
+
+report_url: https://scanner.example.com/reports/claude-sonnet-4-6-20250514

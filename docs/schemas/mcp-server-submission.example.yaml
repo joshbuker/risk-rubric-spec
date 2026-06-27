@@ -1,0 +1,37 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# CSA Risk Rubric — MCP Server Score Submission  [EXAMPLE]
+# POST /api/v1/scores/mcp-server
+#
+# Concrete filled-in example for the official GitHub MCP server assessment.
+# See mcp-server-submission.yaml for field definitions and type annotations.
+# ──────────────────────────────────────────────────────────────────────────────
+
+external_id: null
+
+identity:
+  target_service: GitHub
+  provider_org: GitHub
+  provider_tier: official
+  hosting_type: hosted
+
+scores:
+  transparency: 750
+  reliability: 800
+  security: 720
+  privacy: 770
+  safety_societal: 810
+  excessive_agency: 760
+  composite: 769
+
+evidence:
+  - label: Full assessment report
+    url: https://scanner.example.com/reports/github-mcp-official-2026
+
+  - label: Tool-scope analysis
+    url: https://scanner.example.com/tests/github-mcp-tool-scope
+
+scored_at: "2026-06-20T14:30:00Z"
+
+coi_disclosed: false
+
+report_url: https://scanner.example.com/reports/github-mcp-official-2026

@@ -1,5 +1,5 @@
 # ──────────────────────────────────────────────────────────────────────────────
-# CSA Risk Rubric — AI Model Score Submission
+# CSA Risk Rubric — AI Model Score Submission  [SCHEMA]
 # POST /api/v1/scores/ai-model
 #
 # Submit scanner scores for an AI model service. On first submission for a
@@ -9,40 +9,42 @@
 #
 # Authentication: Bearer token  (Authorization: Bearer sk_<org>_...)
 # Content-Type:   application/json
+#
+# See ai-model-submission.example.yaml for a concrete filled-in example.
 # ──────────────────────────────────────────────────────────────────────────────
 
 # Optional. Your organization's internal identifier for this service.
 # When provided and matched to an existing record, identity-tuple fuzzy
 # matching is bypassed entirely, giving a guaranteed high-confidence match.
 # Omit (or set to null) if you do not maintain external IDs.
-external_id: null
+external_id: string | null
 
 identity:
   # The organization that trained the base model.
   # Use the provider's own canonical name (e.g. "Anthropic", "OpenAI",
   # "Google DeepMind", "Meta").
-  engine_provider: Anthropic
+  engine_provider: string
 
   # The platform or distributor through which the model is accessed,
   # when different from the engine provider.
   # Examples: "AWS Bedrock", "Azure OpenAI Service", "Google Vertex AI".
   # Set to null (or omit) when accessed directly through the provider's
   # own API — not via a third-party cloud platform.
-  platform_provider: null
+  platform_provider: string | null
 
   # The model's family or product name, as published by the provider.
   # Examples: "Claude Sonnet 4.6", "GPT-4o", "Gemini 1.5 Pro".
-  model_name: Claude Sonnet 4.6
+  model_name: string
 
   # The specific version identifier. Use the provider's canonical string —
   # a date-based tag, a release label, or a semantic version, depending
   # on how the provider identifies it.
   # Examples: "20250514", "2024-11-20", "1.5.0"
-  model_version: "20250514"
+  model_version: string
 
 scores:
   # Pillar scores measure the model's performance across six dimensions of
-  # the CSA Risk Rubric methodology. All values are decimals in the range
+  # the CSA Risk Rubric methodology. All values are integers in the range
   # 0–1000 (inclusive). Higher is better.
   #
   # Pillar weights used to compute the composite:
@@ -55,33 +57,33 @@ scores:
 
   # How openly the model documents its capabilities, limitations,
   # training data, and operational boundaries.
-  transparency: 820
+  transparency: integer (0–1000)
 
   # Consistency and predictability of model outputs under normal and
   # adversarial conditions.
-  reliability: 810
+  reliability: integer (0–1000)
 
   # Resistance to prompt injection, data exfiltration, jailbreaks,
   # and other attack vectors.
-  security: 780
+  security: integer (0–1000)
 
   # Handling of personally identifiable information (PII), compliance
   # with data-minimization principles, and absence of undue retention.
-  privacy: 800
+  privacy: integer (0–1000)
 
   # Potential for societal harm, bias amplification, misinformation,
   # or misuse at scale.
-  safety_societal: 760
+  safety_societal: integer (0–1000)
 
   # Tendency to take autonomous actions beyond what was explicitly
   # requested, including tool use, side effects, and scope creep.
-  excessive_agency: 830
+  excessive_agency: integer (0–1000)
 
   # Weighted composite score. Must be within 5 % of the value computed
   # from the pillar scores above using the CSA weights; the API will
   # reject the submission with HTTP 422 if the tolerance is exceeded.
   # See: Risk Rubric v2 Scoring Methodology for the exact formula.
-  composite: 800
+  composite: integer (0–1000)
 
 # Optional. A list of artifacts that substantiate the scores above.
 # Include anything a reviewer could use to independently verify a finding:
@@ -89,26 +91,23 @@ scores:
 # The list may be empty.
 evidence:
   - # Short human-readable label describing the artifact.
-    label: Full assessment report
+    label: string
     # Publicly accessible URL to the artifact. Must be a valid URL.
-    url: https://scanner.example.com/reports/claude-sonnet-4-6-20250514
-
-  - label: Prompt-injection test suite results
-    url: https://scanner.example.com/tests/claude-sonnet-4-6-injection
+    url: string (URL)
 
 # ISO 8601 datetime recording when the assessment was performed —
 # i.e. when the scanner ran, not when this request is sent.
 # Must not be in the future. Timezone offset is accepted; naive
 # datetimes are treated as UTC.
-scored_at: "2026-06-20T14:30:00Z"
+scored_at: string (ISO 8601 datetime)
 
 # Set to true if your organization has a material relationship with the
 # model provider being assessed (e.g. financial interest, partnership,
 # contractual dependency). Disclosing a conflict of interest does not
 # prevent submission; it is recorded alongside the scores for transparency.
-coi_disclosed: false
+coi_disclosed: boolean
 
 # Permanent URL to the human-readable report for this specific assessment.
 # Required. Must be a valid URL. This is what end-users will follow to read
 # the full findings behind the scores.
-report_url: https://scanner.example.com/reports/claude-sonnet-4-6-20250514
+report_url: string (URL)
